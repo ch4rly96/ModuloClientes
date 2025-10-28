@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalles del Cliente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-info text-white">
+            <h3>Detalles del Cliente</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>ID:</strong> <span th:text="${cliente.idCliente}"></span></p>
+            <p><strong>Tipo Cliente:</strong> <span th:text="${cliente.tipoCliente}"></span></p>
+            <p><strong>Nombre:</strong> <span th:text="${cliente.nombres + ' ' + cliente.apellidos}"></span></p>
+            <p><strong>Razón Social:</strong> <span th:text="${cliente.razonSocial}"></span></p>
+            <p><strong>Documento:</strong> <span th:text="${cliente.tipoDocumento + ' - ' + cliente.documentoIdentidad}"></span></p>
+            <p><strong>Email:</strong> <span th:text="${cliente.email}"></span></p>
+            <p><strong>Teléfono:</strong> <span th:text="${cliente.telefono}"></span></p>
+            <p><strong>Dirección:</strong> <span th:text="${cliente.direccionPrincipal}"></span></p>
+            <p><strong>Estado:</strong>
+                <span th:text="${cliente.estado ? 'Activo' : 'Inactivo'}"
+                      th:classappend="${cliente.estado ? 'text-success' : 'text-danger'}"></span>
+            </p>
+
+            <div class="mt-4 text-center">
+                <a href="/clientes" class="btn btn-secondary px-4">Volver</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -18,16 +18,17 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     public Cliente guardarCliente(Cliente cliente) {
         // Validaciones usando Apache Commons Lang
-        if (StringUtils.isBlank(cliente.getNombres())) {
-            throw new IllegalArgumentException("El nombre del cliente no puede estar vacio.");
-        }
-
-        if (StringUtils.isBlank(cliente.getDocumentoIdentidad())) {
-            throw new IllegalArgumentException("El documento de identidad es obligatorio.");
-        }
-
-        if (!StringUtils.isNumeric(cliente.getDocumentoIdentidad())) {
-            throw new IllegalArgumentException("El documento de identidad debe contener solo numeros.");
+        if ("Persona".equalsIgnoreCase(cliente.getTipoCliente())) {
+            if (StringUtils.isBlank(cliente.getNombres())) {
+                throw new IllegalArgumentException("El nombre del cliente no puede estar vacío.");
+            }
+            if (StringUtils.isBlank(cliente.getApellidos())) {
+                throw new IllegalArgumentException("El apellido del cliente no puede estar vacío.");
+            }
+        } else if ("Empresa".equalsIgnoreCase(cliente.getTipoCliente())) {
+            if (StringUtils.isBlank(cliente.getRazonSocial())) {
+                throw new IllegalArgumentException("La razón social no puede estar vacía.");
+            }
         }
 
         // Si pasa las validaciones, se guarda

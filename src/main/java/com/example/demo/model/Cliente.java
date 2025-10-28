@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,28 +14,41 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCliente;
 
+    @NotBlank(message = "Debe seleccionar el tipo de cliente (persona o empresa)")
     @Column(nullable = false)
     private String tipoCliente; // persona o empresa
 
+    @Size(max = 50, message = "El nombre no puede superar los 50 caracteres")
     private String nombres;
+
+    @Size(max = 50, message = "El apellido no puede superar los 50 caracteres")
     private String apellidos;
+
+    @Size(max = 100, message = "La razón social no puede superar los 100 caracteres")
     private String razonSocial;
 
+    @NotBlank(message = "Debe seleccionar el tipo de documento")
     @Column(nullable = false)
     private String tipoDocumento; // DNI, RUC, CE, PAS
 
+    @NotBlank(message = "El número de documento es obligatorio")
     @Column(nullable = false, unique = true)
+    @Size(max = 20, message = "El número de documento no puede superar los 20 caracteres")
     private String documentoIdentidad;
 
+    @Email(message = "Debe ingresar un correo válido")
     @Column(unique = true)
     private String email;
 
+    @Pattern(regexp = "\\d{9}", message = "El teléfono debe tener 9 dígitos")
     private String telefono;
 
+    @Size(max = 255, message = "La dirección principal no puede tener más de 255 caracteres")
     @Column(columnDefinition = "TEXT")
     private String direccionPrincipal;
 
     private LocalDateTime fechaRegistro = LocalDateTime.now();
+
     private Boolean estado = true;
 
     //  Relaciones bidireccionales

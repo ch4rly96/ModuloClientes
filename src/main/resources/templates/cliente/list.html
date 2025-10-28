@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Clientes Registrados</h2>
+        <a href="/clientes/nuevo" class="btn btn-primary">+ Nuevo Cliente</a>
+    </div>
+
+    <table class="table table-striped table-hover shadow">
+        <thead class="table-primary text-center">
+        <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Nombre/Razón Social</th>
+            <th>Documento</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody class="text-center" th:each="cliente : ${clientes}">
+        <tr>
+            <td th:text="${cliente.idCliente}"></td>
+            <td th:text="${cliente.tipoCliente}"></td>
+            <td th:text="${cliente.tipoCliente == 'Empresa' ? (cliente.razonSocial != null ? cliente.razonSocial : '-')
+           : (cliente.nombres != null ? cliente.nombres : '') + ' ' + (cliente.apellidos != null ? cliente.apellidos : '')}"></td>
+            <td th:text="${cliente.documentoIdentidad}"></td>
+            <td th:text="${cliente.email}"></td>
+            <td th:text="${cliente.telefono}"></td>
+            <td>
+                <span th:text="${cliente.estado ? 'Activo' : 'Inactivo'}"
+                      th:classappend="${cliente.estado ? 'text-success' : 'text-danger'}"></span>
+            </td>
+            <td>
+                <a th:href="@{'/clientes/ver/' + ${cliente.idCliente}}" class="btn btn-info btn-sm">Ver</a>
+                <a th:href="@{'/clientes/eliminar/' + ${cliente.idCliente}}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('¿Desea eliminar este cliente?')">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

@@ -23,7 +23,7 @@ public class DireccionesServiceImpl implements DireccionesService{
             throw new IllegalArgumentException("La dirección debe estar asociada a un cliente.");
         }
 
-        if (StringUtils.isBlank(direccion.getDireccionCompleta())) {
+        if (StringUtils.isBlank(direccion.getDireccion())) {
             throw new IllegalArgumentException("La dirección no puede estar vacía.");
         }
 
