@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.Historial;
 import com.example.demo.model.Cliente;
 import com.example.demo.repository.HistorialRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,20 @@ public class HistorialServiceImpl implements HistorialService{
 
     @Override
     public Historial guardarHistorial(Historial historial) {
+        // Validaciones con Apache Commons Lang
+        if (historial.getCliente() == null) {
+            throw new IllegalArgumentException("El historial debe estar asociado a un cliente.");
+        }
+
+        if (StringUtils.isBlank(historial.getTipoInteraccion())) {
+            throw new IllegalArgumentException("Debe especificar el tipo de interacción (consulta, compra, reclamo, devolución, etc).");
+        }
+
+        if (StringUtils.isBlank(historial.getDetalle())) {
+            throw new IllegalArgumentException("El detalle del historial no puede estar vacío.");
+        }
+
+        // Si pasa las validaciones, se guarda
         return historialRepository.save(historial);
     }
 

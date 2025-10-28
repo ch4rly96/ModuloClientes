@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.Direcciones;
 import com.example.demo.model.Cliente;
 import com.example.demo.repository.DireccionesRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +18,20 @@ public class DireccionesServiceImpl implements DireccionesService{
 
     @Override
     public Direcciones guardarDireccion(Direcciones direccion) {
+        // Validaciones con Apache Commons Lang
+        if (direccion.getCliente() == null) {
+            throw new IllegalArgumentException("La dirección debe estar asociada a un cliente.");
+        }
+
+        if (StringUtils.isBlank(direccion.getDireccionCompleta())) {
+            throw new IllegalArgumentException("La dirección no puede estar vacía.");
+        }
+
+        if (StringUtils.isBlank(direccion.getTipoDireccion())) {
+            throw new IllegalArgumentException("Debe especificar el tipo de dirección (principal, envío, etc).");
+        }
+
+        // Si pasa las validaciones, se guarda
         return direccionesRepository.save(direccion);
     }
 
