@@ -40,6 +40,7 @@
             </td>
             <td>
                 <a th:href="@{'/clientes/ver/' + ${cliente.idCliente}}" class="btn btn-info btn-sm">Ver</a>
+                <a th:href="@{'/clientes/editar/' + ${ciente.idCliente}}" class="btn btn-primary btn-sm">Editar</a>
                 <a th:href="@{'/clientes/eliminar/' + ${cliente.idCliente}}" class="btn btn-danger btn-sm"
                    onclick="return confirm('¿Desea eliminar este cliente?')">Eliminar</a>
             </td>
