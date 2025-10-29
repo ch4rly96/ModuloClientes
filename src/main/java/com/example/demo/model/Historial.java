@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,15 +16,25 @@ public class Historial {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler","direcciones", "historial"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "direcciones", "historial"})
     private Cliente cliente;
 
+    @PastOrPresent(message = "La fecha no puede ser futura")
+    @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
 
-    @Column(length = 50)
-    private String tipoInteraccion; // consulta, compra, reclamo, devolucion
+    @NotBlank(message = "Debe seleccionar el tipo de interacción")
+    @Size(max = 50, message = "El tipo de interacción no puede superar los 50 caracteres")
+    @Pattern(
+            regexp = "^(consulta|compra|reclamo|devolucion)$",
+            message = "El tipo de interacción debe ser: consulta, compra, reclamo o devolucion"
+    )
+    @Column(length = 50, nullable = false)
+    private String tipoInteraccion;
 
-    @Column(columnDefinition = "TEXT")
+    @NotBlank(message = "El detalle no puede estar vacío")
+    @Size(max = 500, message = "El detalle no puede superar los 500 caracteres")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String detalle;
 
     // Constructor vacío (obligatorio)

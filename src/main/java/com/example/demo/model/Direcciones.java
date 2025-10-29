@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "direcciones_clientes")
@@ -17,15 +18,26 @@ public class Direcciones {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "direcciones"})
     private Cliente cliente;
 
+    @NotBlank(message = "Debe seleccionar el tipo de dirección")
+    @Pattern(regexp = "principal|envio|facturacion", message = "El tipo de dirección debe ser 'principal', 'envio' o 'facturacion'")
     @Column(length = 20)
-    private String tipoDireccion; // principal, envio, facturacion
+    private String tipoDireccion;
 
+    @NotBlank(message = "La dirección no puede estar vacía")
+    @Size(max = 255, message = "La dirección no puede tener más de 255 caracteres")
     @Column(columnDefinition = "TEXT", nullable = false)
     private String direccion;
 
+    @NotBlank(message = "La ciudad no puede estar vacía")
+    @Size(max = 50, message = "La ciudad no puede tener más de 50 caracteres")
     private String ciudad;
+
+    @NotBlank(message = "El departamento no puede estar vacío")
+    @Size(max = 50, message = "El departamento no puede tener más de 50 caracteres")
     private String departamento;
 
+    @NotBlank(message = "El país no puede estar vacío")
+    @Size(max = 50, message = "El país no puede tener más de 50 caracteres")
     @Column(nullable = false, columnDefinition = "VARCHAR(100) DEFAULT 'Perú'")
     private String pais = "Perú";
 
