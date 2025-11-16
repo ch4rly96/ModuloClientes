@@ -1,6 +1,9 @@
 package com.example.demo.service;
 
+import com.example.demo.model.Cliente;
 import com.example.demo.model.Historial;
+import com.example.demo.model.Usuario;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
