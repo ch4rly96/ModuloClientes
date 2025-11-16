@@ -1,20 +1,18 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Historial;
-import com.example.demo.model.Cliente;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface HistorialService {
-    Historial guardarHistorial(Historial historial);
 
-    List<Historial> listarHistoriales();
+    // Crear entrada (automático o manual)
+    Historial registrar(Cliente cliente, Usuario usuario, String tipoInteraccion, String detalle);
 
-    Optional<Historial> obtenerPorId(Long id);
+    // Listar por cliente
+    List<Historial> listarPorCliente(Long idCliente);
 
-    List<Historial> listarPorCliente(Cliente cliente);
-
-    List<Historial> listarPorTipo(String tipoInteraccion);
-
-    void eliminarHistorial(Long id);
+    // Opcionales
+    List<Historial> listarPorTipo(Long idCliente, String tipo);
+    List<Historial> listarPorRango(Long idCliente, LocalDateTime desde, LocalDateTime hasta);
 }

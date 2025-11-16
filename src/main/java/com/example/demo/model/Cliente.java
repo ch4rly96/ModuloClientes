@@ -3,6 +3,7 @@ package com.example.demo.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,9 +15,15 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCliente;
 
-    @NotBlank(message = "Debe seleccionar el tipo de cliente (persona o empresa)")
+    @NotBlank(message = "Debe seleccionar si es persona o empresa")
     @Column(nullable = false)
-    private String tipoCliente; // persona o empresa
+    private String cliente; // 'persona' o 'empresa'
+
+    @NotBlank(message = "Debe seleccionar el subtipo de cliente")
+    @Column(name = "tipo_cliente", nullable = false)
+    private String tipoCliente; // 'natural', 'juridico', 'constructor', 'corporativo'
+
+    // DATOS PERSONALES / EMPRESA
 
     @Size(max = 50, message = "El nombre no puede superar los 50 caracteres")
     private String nombres;
@@ -47,11 +54,22 @@ public class Cliente {
     @Column(columnDefinition = "TEXT")
     private String direccionPrincipal;
 
+    // ERP: DEUDA Y ESTADO
+
+    @Column(name = "deuda_actual", nullable = false)
+    private BigDecimal deudaActual = BigDecimal.ZERO;
+
+    @Column(name = "es_moroso", nullable = false)
+    private Boolean esMoroso = false;
+
+    @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
+    @Column(nullable = false)
     private Boolean estado = true;
 
-    //  Relaciones bidireccionales
+    // RELACIONES
+
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "cliente"})
     private List<Direcciones> direcciones;
@@ -60,140 +78,92 @@ public class Cliente {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "cliente"})
     private List<Historial> historial;
 
-    // Constructor vacío (obligatorio para JPA)
-    public Cliente() {
-    }
+    // CONSTRUCTORES
 
-    // Constructor con todos los campos
-    public Cliente(Long idCliente, String tipoCliente, String nombres, String apellidos, String razonSocial,
-                   String tipoDocumento, String documentoIdentidad, String email, String telefono,
-                   String direccionPrincipal, LocalDateTime fechaRegistro, Boolean estado) {
-        this.idCliente = idCliente;
-        this.tipoCliente = tipoCliente;
-        this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.razonSocial = razonSocial;
-        this.tipoDocumento = tipoDocumento;
-        this.documentoIdentidad = documentoIdentidad;
-        this.email = email;
-        this.telefono = telefono;
-        this.direccionPrincipal = direccionPrincipal;
-        this.fechaRegistro = fechaRegistro;
-        this.estado = estado;
-    }
+    public Cliente() {}
 
-    // Getters y Setters
-    public Long getIdCliente() {
-        return idCliente;
-    }
-
-    public void setIdCliente(Long idCliente) {
-        this.idCliente = idCliente;
-    }
-
-    public String getTipoCliente() {
-        return tipoCliente;
-    }
-
-    public void setTipoCliente(String tipoCliente) {
+    public Cliente(String cliente, String tipoCliente) {
+        this.cliente = cliente;
         this.tipoCliente = tipoCliente;
     }
 
-    public String getNombres() {
-        return nombres;
+    // GETTERS Y SETTERS
+
+    public Long getIdCliente() { return idCliente; }
+    public void setIdCliente(Long idCliente) { this.idCliente = idCliente; }
+
+    public String getCliente() { return cliente; }
+    public void setCliente(String cliente) { this.cliente = cliente; }
+
+    public String getTipoCliente() { return tipoCliente; }
+    public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente; }
+
+    public String getNombres() { return nombres; }
+    public void setNombres(String nombres) { this.nombres = nombres; }
+
+    public String getApellidos() { return apellidos; }
+    public void setApellidos(String apellidos) { this.apellidos = apellidos; }
+
+    public String getRazonSocial() { return razonSocial; }
+    public void setRazonSocial(String razonSocial) { this.razonSocial = razonSocial; }
+
+    public String getTipoDocumento() { return tipoDocumento; }
+    public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
+
+    public String getDocumentoIdentidad() { return documentoIdentidad; }
+    public void setDocumentoIdentidad(String documentoIdentidad) { this.documentoIdentidad = documentoIdentidad; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+
+    public String getDireccionPrincipal() { return direccionPrincipal; }
+    public void setDireccionPrincipal(String direccionPrincipal) { this.direccionPrincipal = direccionPrincipal; }
+
+    public BigDecimal getDeudaActual() { return deudaActual; }
+    public void setDeudaActual(BigDecimal deudaActual) { this.deudaActual = deudaActual != null ? deudaActual : BigDecimal.ZERO; }
+
+    public Boolean getEsMoroso() { return esMoroso; }
+    public void setEsMoroso(Boolean esMoroso) { this.esMoroso = esMoroso != null ? esMoroso : false; }
+
+    public LocalDateTime getFechaRegistro() { return fechaRegistro; }
+    public void setFechaRegistro(LocalDateTime fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+
+    public Boolean getEstado() { return estado; }
+    public void setEstado(Boolean estado) { this.estado = estado != null ? estado : true; }
+
+    public List<Direcciones> getDirecciones() { return direcciones; }
+    public void setDirecciones(List<Direcciones> direcciones) { this.direcciones = direcciones; }
+
+    public List<Historial> getHistorial() { return historial; }
+    public void setHistorial(List<Historial> historial) { this.historial = historial; }
+
+    // METODO AUXILIAR: Nombre completo o razon social
+
+    public String getNombreCompleto() {
+        if ("persona".equalsIgnoreCase(cliente)) {
+            return String.join(" ",
+                    nombres != null ? nombres.trim() : "",
+                    apellidos != null ? apellidos.trim() : ""
+            ).trim();
+        } else {
+            return razonSocial != null ? razonSocial.trim() : "";
+        }
     }
 
-    public void setNombres(String nombres) {
-        this.nombres = nombres;
-    }
-
-    public String getApellidos() {
-        return apellidos;
-    }
-
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
-    }
-
-    public String getRazonSocial() {
-        return razonSocial;
-    }
-
-    public void setRazonSocial(String razonSocial) {
-        this.razonSocial = razonSocial;
-    }
-
-    public String getTipoDocumento() {
-        return tipoDocumento;
-    }
-
-    public void setTipoDocumento(String tipoDocumento) {
-        this.tipoDocumento = tipoDocumento;
-    }
-
-    public String getDocumentoIdentidad() {
-        return documentoIdentidad;
-    }
-
-    public void setDocumentoIdentidad(String documentoIdentidad) {
-        this.documentoIdentidad = documentoIdentidad;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public String getDireccionPrincipal() {
-        return direccionPrincipal;
-    }
-
-    public void setDireccionPrincipal(String direccionPrincipal) {
-        this.direccionPrincipal = direccionPrincipal;
-    }
-
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
-    }
-
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
-    }
-
-    public Boolean getEstado() {
-        return estado;
-    }
-
-    public void setEstado(Boolean estado) {
-        this.estado = estado;
-    }
-
-    // 🔹 toString() (opcional)
     @Override
     public String toString() {
         return "Cliente{" +
                 "idCliente=" + idCliente +
+                ", cliente='" + cliente + '\'' +
                 ", tipoCliente='" + tipoCliente + '\'' +
-                ", nombres='" + nombres + '\'' +
-                ", apellidos='" + apellidos + '\'' +
-                ", razonSocial='" + razonSocial + '\'' +
-                ", tipoDocumento='" + tipoDocumento + '\'' +
+                ", nombreCompleto='" + getNombreCompleto() + '\'' +
                 ", documentoIdentidad='" + documentoIdentidad + '\'' +
                 ", email='" + email + '\'' +
-                ", telefono='" + telefono + '\'' +
-                ", direccionPrincipal='" + direccionPrincipal + '\'' +
-                ", fechaRegistro=" + fechaRegistro +
+                ", deudaActual=" + deudaActual +
+                ", esMoroso=" + esMoroso +
                 ", estado=" + estado +
                 '}';
     }

@@ -1,62 +1,62 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Historial;
 import com.example.demo.model.Cliente;
+import com.example.demo.model.Historial;
+import com.example.demo.model.Usuario;
 import com.example.demo.repository.HistorialRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class HistorialServiceImpl implements HistorialService{
+public class HistorialServiceImpl implements HistorialService {
 
     @Autowired
     private HistorialRepository historialRepository;
 
     @Override
-    public Historial guardarHistorial(Historial historial) {
-        // Validaciones con Apache Commons Lang
-        if (historial.getCliente() == null) {
-            throw new IllegalArgumentException("El historial debe estar asociado a un cliente.");
+    public Historial registrar(Cliente cliente, Usuario usuario, String tipoInteraccion, String detalle) {
+        validarEntrada(cliente, usuario, tipoInteraccion, detalle);
+
+        Historial entrada = new Historial();
+        entrada.setCliente(cliente);
+        entrada.setCreadoPor(usuario);
+        entrada.setTipoInteraccion(tipoInteraccion);
+        entrada.setDetalle(detalle);
+
+        return historialRepository.save(entrada);
+    }
+
+    private void validarEntrada(Cliente cliente, Usuario usuario, String tipo, String detalle) {
+        if (cliente == null || cliente.getIdCliente() == null) {
+            throw new IllegalArgumentException("Cliente inválido.");
         }
-
-        if (StringUtils.isBlank(historial.getTipoInteraccion())) {
-            throw new IllegalArgumentException("Debe especificar el tipo de interacción (consulta, compra, reclamo, devolución, etc).");
+        if (usuario == null) {
+            throw new IllegalArgumentException("Usuario requerido para auditoría.");
         }
-
-        if (StringUtils.isBlank(historial.getDetalle())) {
-            throw new IllegalArgumentException("El detalle del historial no puede estar vacío.");
+        if (StringUtils.isBlank(tipo)) {
+            throw new IllegalArgumentException("Tipo de interacción requerido.");
         }
-
-        // Si pasa las validaciones, se guarda
-        return historialRepository.save(historial);
+        if (StringUtils.isBlank(detalle)) {
+            throw new IllegalArgumentException("Detalle requerido.");
+        }
     }
 
     @Override
-    public List<Historial> listarHistoriales() {
-        return historialRepository.findAll();
+    public List<Historial> listarPorCliente(Long idCliente) {
+        return historialRepository.findByClienteIdClienteOrderByCreadoEnDesc(idCliente);
     }
 
     @Override
-    public Optional<Historial> obtenerPorId(Long id) {
-        return historialRepository.findById(id);
+    public List<Historial> listarPorTipo(Long idCliente, String tipo) {
+        return historialRepository.findByClienteIdClienteAndTipoInteraccionOrderByCreadoEnDesc(idCliente, tipo);
     }
 
     @Override
-    public List<Historial> listarPorCliente(Cliente cliente) {
-        return historialRepository.findByCliente(cliente);
-    }
-
-    @Override
-    public List<Historial> listarPorTipo(String tipoInteraccion) {
-        return historialRepository.findByTipoInteraccion(tipoInteraccion);
-    }
-
-    @Override
-    public void eliminarHistorial(Long id) {
-        historialRepository.deleteById(id);
+    public List<Historial> listarPorRango(Long idCliente, LocalDateTime desde, LocalDateTime hasta) {
+        return historialRepository.findByClienteIdClienteAndCreadoEnBetweenOrderByCreadoEnDesc(idCliente, desde, hasta);
     }
 }

@@ -3,6 +3,7 @@ package com.example.demo.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "direcciones_clientes")
@@ -19,8 +20,9 @@ public class Direcciones {
     private Cliente cliente;
 
     @NotBlank(message = "Debe seleccionar el tipo de dirección")
-    @Pattern(regexp = "principal|envio|facturacion", message = "El tipo de dirección debe ser 'principal', 'envio' o 'facturacion'")
-    @Column(length = 20)
+    @Pattern(regexp = "PRINCIPAL|ENVIO|FACTURACION",
+            message = "Tipo debe ser: PRINCIPAL, ENVIO o FACTURACION")
+    @Column(name = "tipo_direccion", length = 20, nullable = false)
     private String tipoDireccion;
 
     @NotBlank(message = "La dirección no puede estar vacía")
@@ -41,14 +43,11 @@ public class Direcciones {
     @Column(nullable = false, columnDefinition = "VARCHAR(100) DEFAULT 'Perú'")
     private String pais = "Perú";
 
-    // Constructor vacío (obligatorio)
-    public Direcciones() {
-    }
+    // CONSTRUCTORES
 
-    // Constructor con parámetros
-    public Direcciones(Long idDireccion, Cliente cliente, String tipoDireccion, String direccion,
-                              String ciudad, String departamento, String pais) {
-        this.idDireccion = idDireccion;
+    public Direcciones() {}
+
+    public Direcciones(Cliente cliente, String tipoDireccion, String direccion, String ciudad, String departamento, String pais) {
         this.cliente = cliente;
         this.tipoDireccion = tipoDireccion;
         this.direccion = direccion;
@@ -57,7 +56,32 @@ public class Direcciones {
         this.pais = pais;
     }
 
-    // Getters y Setters
+    // GETTERS Y SETTERS
+
+    public String getPais() {
+        return pais;
+    }
+
+    public void setPais(String pais) {
+        this.pais = pais;
+    }
+
+    public String getCiudad() {
+        return ciudad;
+    }
+
+    public void setCiudad(String ciudad) {
+        this.ciudad = ciudad;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
     public Long getIdDireccion() {
         return idDireccion;
     }
@@ -82,22 +106,6 @@ public class Direcciones {
         this.tipoDireccion = tipoDireccion;
     }
 
-    public String getDireccion() {
-        return direccion;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-
-    public String getCiudad() {
-        return ciudad;
-    }
-
-    public void setCiudad(String ciudad) {
-        this.ciudad = ciudad;
-    }
-
     public String getDepartamento() {
         return departamento;
     }
@@ -106,13 +114,8 @@ public class Direcciones {
         this.departamento = departamento;
     }
 
-    public String getPais() {
-        return pais;
-    }
 
-    public void setPais(String pais) {
-        this.pais = pais;
-    }
+    // toString()
 
     @Override
     public String toString() {
@@ -124,6 +127,19 @@ public class Direcciones {
                 ", departamento='" + departamento + '\'' +
                 ", pais='" + pais + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Direcciones that = (Direcciones) o;
+        return Objects.equals(idDireccion, that.idDireccion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idDireccion);
     }
 }
 

@@ -19,16 +19,16 @@ public class Historial {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "direcciones", "historial"})
     private Cliente cliente;
 
-    @PastOrPresent(message = "La fecha no puede ser futura")
-    @Column(nullable = false)
-    private LocalDateTime fecha = LocalDateTime.now();
+    @Column(name = "creado_en", nullable = false, updatable = false)
+    private LocalDateTime creadoEn = LocalDateTime.now();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creado_por", updatable = false)
+    private Usuario creadoPor;
 
     @NotBlank(message = "Debe seleccionar el tipo de interacción")
-    @Size(max = 50, message = "El tipo de interacción no puede superar los 50 caracteres")
-    @Pattern(
-            regexp = "^(consulta|compra|reclamo|devolucion)$",
-            message = "El tipo de interacción debe ser: consulta, compra, reclamo o devolucion"
-    )
+    @Pattern(regexp = "consulta|compra|reclamo|devolucion",
+            message = "Tipo debe ser: consulta, compra, reclamo o devolucion")
     @Column(length = 50, nullable = false)
     private String tipoInteraccion;
 
@@ -37,65 +37,34 @@ public class Historial {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String detalle;
 
-    // Constructor vacío (obligatorio)
-    public Historial() {
-    }
 
-    // Constructor con parámetros
-    public Historial(Long idHistorial, Cliente cliente, LocalDateTime fecha, String tipoInteraccion, String detalle) {
-        this.idHistorial = idHistorial;
+    public Historial() {}
+
+    public Historial(Cliente cliente, Usuario creadoPor, String tipoInteraccion, String detalle) {
         this.cliente = cliente;
-        this.fecha = fecha;
+        this.creadoPor = creadoPor;
         this.tipoInteraccion = tipoInteraccion;
         this.detalle = detalle;
     }
 
-    // Getters y Setters
-    public Long getIdHistorial() {
-        return idHistorial;
-    }
+    // GETTERS (sin setter para creadoEn)
 
-    public void setIdHistorial(Long idHistorial) {
-        this.idHistorial = idHistorial;
-    }
+    public Long getIdHistorial() { return idHistorial; }
+    public Cliente getCliente() { return cliente; }
+    public LocalDateTime getCreadoEn() { return creadoEn; }
+    public Usuario getCreadoPor() { return creadoPor; }
+    public String getTipoInteraccion() { return tipoInteraccion; }
+    public String getDetalle() { return detalle; }
 
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
-    }
-
-    public String getTipoInteraccion() {
-        return tipoInteraccion;
-    }
-
-    public void setTipoInteraccion(String tipoInteraccion) {
-        this.tipoInteraccion = tipoInteraccion;
-    }
-
-    public String getDetalle() {
-        return detalle;
-    }
-
-    public void setDetalle(String detalle) {
-        this.detalle = detalle;
-    }
+    // Setters (solo para campos editables)
+    public void setTipoInteraccion(String tipoInteraccion) { this.tipoInteraccion = tipoInteraccion; }
+    public void setDetalle(String detalle) { this.detalle = detalle; }
 
     @Override
     public String toString() {
         return "Historial{" +
                 "idHistorial=" + idHistorial +
-                ", fecha=" + fecha +
+                ", creadoEn=" + creadoEn +
                 ", tipoInteraccion='" + tipoInteraccion + '\'' +
                 ", detalle='" + detalle + '\'' +
                 '}';

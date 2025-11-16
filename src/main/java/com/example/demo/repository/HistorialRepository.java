@@ -5,13 +5,19 @@ import com.example.demo.model.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface HistorialRepository extends JpaRepository<Historial, Long> {
-    // Buscar todo el historial de un cliente
-    List<Historial> findByCliente(Cliente cliente);
+    // Listar por cliente (ordenado por fecha descendente)
+    List<Historial> findByClienteIdClienteOrderByCreadoEnDesc(Long idCliente);
 
-    // Buscar historial por tipo de interacción (consulta, compra, reclamo, etc.)
-    List<Historial> findByTipoInteraccion(String tipoInteraccion);
+    // Opcional: filtrar por tipo
+    List<Historial> findByClienteIdClienteAndTipoInteraccionOrderByCreadoEnDesc(
+            Long idCliente, String tipoInteraccion);
+
+    // Opcional: por rango de fechas
+    List<Historial> findByClienteIdClienteAndCreadoEnBetweenOrderByCreadoEnDesc(
+            Long idCliente, LocalDateTime desde, LocalDateTime hasta);
 }

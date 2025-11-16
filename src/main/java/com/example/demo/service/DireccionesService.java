@@ -7,14 +7,9 @@ import java.util.Optional;
 
 public interface DireccionesService {
     Direcciones guardarDireccion(Direcciones direccion);
-
-    List<Direcciones> listarDirecciones();
-
     Optional<Direcciones> obtenerPorId(Long id);
-
-    List<Direcciones> listarPorCliente(Cliente cliente);
-
-    List<Direcciones> listarPorTipo(String tipoDireccion);
-
-    void eliminarDireccion(Long id);
+    List<Direcciones> listarPorCliente(Long idCliente);
+    List<Direcciones> listarPorTipo(String tipo);  // ← String
+    Optional<Direcciones> obtenerPrincipal(Long idCliente);
+    void eliminarDireccion(Long idDireccion, Long idCliente);
 }

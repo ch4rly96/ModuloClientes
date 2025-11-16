@@ -1,56 +1,37 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Historial;
+import com.example.demo.model.Cliente;
+import com.example.demo.service.ClienteService;
 import com.example.demo.service.HistorialService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/historiales")
+@Controller
+@RequestMapping("/clientes")
 public class HistorialController {
 
+    private final ClienteService clienteService;
     private final HistorialService historialService;
 
-    public HistorialController(HistorialService historialService) {
+    public HistorialController(ClienteService clienteService, HistorialService historialService) {
+        this.clienteService = clienteService;
         this.historialService = historialService;
     }
 
-    // Listar todos los historiales
-    @GetMapping
-    public ResponseEntity<List<Historial>> obtenerTodas() {
-        return ResponseEntity.ok(historialService.listarHistoriales());
-    }
+    // ========================================
+    // MOSTRAR HISTORIAL EN FICHA DE CLIENTE
+    // ========================================
+    @GetMapping("/{id}/historial")
+    public String verHistorial(@PathVariable Long id, Model model) {
+        Cliente cliente = clienteService.obtenerPorId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
 
-    // Obtener historial por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Historial> obtenerPorId(@PathVariable Long id) {
-        return historialService.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+        model.addAttribute("cliente", cliente);
+        model.addAttribute("historiales", historialService.listarPorCliente(id));
 
-    // Crear historial
-    @PostMapping
-    public ResponseEntity<Historial> crearHistorial(@RequestBody Historial historial) {
-        return ResponseEntity.ok(historialService.guardarHistorial(historial));
-    }
-
-    // Actualizar historial
-    @PutMapping("/{id}")
-    public ResponseEntity<Historial> actualizarHistorial(@PathVariable Long id, @RequestBody Historial historial) {
-        if (historialService.obtenerPorId(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        historial.setIdHistorial(id);
-        return ResponseEntity.ok(historialService.guardarHistorial(historial));
-    }
-
-    // Eliminar historial
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarHistorial(@PathVariable Long id) {
-        historialService.eliminarHistorial(id);
-        return ResponseEntity.noContent().build();
+        return "clientes/historial"; // → historial.html (pestaña o modal)
     }
 }

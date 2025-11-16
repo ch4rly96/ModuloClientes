@@ -1,56 +1,67 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Direcciones;
+import com.example.demo.model.Cliente;
+import com.example.demo.service.ClienteService;
 import com.example.demo.service.DireccionesService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/direcciones")
+@Controller
+@RequestMapping("/clientes")
 public class DireccionesController {
 
+    private final ClienteService clienteService;
     private final DireccionesService direccionesService;
 
-    public DireccionesController(DireccionesService direccionesService) {
+    public DireccionesController(ClienteService clienteService, DireccionesService direccionesService) {
+        this.clienteService = clienteService;
         this.direccionesService = direccionesService;
     }
 
-    // Obtener todas las direcciones
-    @GetMapping
-    public ResponseEntity<List<Direcciones>> obtenerTodas() {
-        return ResponseEntity.ok(direccionesService.listarDirecciones());
-    }
-
-    // Obtener una dirección por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Direcciones> obtenerPorId(@PathVariable Long id) {
-        return direccionesService.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public String verCliente(@PathVariable Long id, Model model) {
+        Cliente cliente = clienteService.obtenerPorId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
+
+        model.addAttribute("cliente", cliente);
+        model.addAttribute("direcciones", direccionesService.listarPorCliente(id));
+        model.addAttribute("tienePrincipal",
+                direccionesService.obtenerPrincipal(id).isPresent());
+
+        // Para el modal de nueva dirección
+        model.addAttribute("nuevaDireccion", new Direcciones());
+
+        return "clientes/ficha"; // → ficha.html
     }
 
-    // Crear nueva dirección
-    @PostMapping
-    public ResponseEntity<Direcciones> crearDirecciones(@RequestBody Direcciones direcciones) {
-        return ResponseEntity.ok(direccionesService.guardarDireccion(direcciones));
-    }
+    @PostMapping("/{idCliente}/direcciones")
+    public String guardarDireccion(
+            @PathVariable Long idCliente,
+            @ModelAttribute("nuevaDireccion") Direcciones direccion,
+            @RequestParam(required = false) Long idDireccion) {
 
-    // Actualizar una dirección existente
-    @PutMapping("/{id}")
-    public ResponseEntity<Direcciones> actualizarDirecciones(@PathVariable Long id, @RequestBody Direcciones direcciones) {
-        if (direccionesService.obtenerPorId(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
+        Cliente cliente = clienteService.obtenerPorId(idCliente)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
+
+        direccion.setCliente(cliente);
+        if (idDireccion != null) {
+            direccion.setIdDireccion(idDireccion);
         }
-        direcciones.setIdDireccion(id);
-        return ResponseEntity.ok(direccionesService.guardarDireccion(direcciones));
+
+        direccionesService.guardarDireccion(direccion);
+
+        return "redirect:/clientes/" + idCliente;
     }
 
-    // Eliminar una dirección
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarDirecciones(@PathVariable Long id) {
-        direccionesService.eliminarDireccion(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/{idCliente}/direcciones/{idDireccion}/eliminar")
+    public String eliminarDireccion(
+            @PathVariable Long idCliente,
+            @PathVariable Long idDireccion) {
+
+        direccionesService.eliminarDireccion(idDireccion, idCliente);
+
+        return "redirect:/clientes/" + idCliente;
     }
 }

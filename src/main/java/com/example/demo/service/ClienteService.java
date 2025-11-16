@@ -1,25 +1,31 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Cliente;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 public interface ClienteService {
-    // Crear o actualizar cliente
+
+    // === CRUD BÁSICO ===
     Cliente guardarCliente(Cliente cliente);
-
-    // Obtener todos los clientes
     List<Cliente> listarClientes();
-
-    // Buscar cliente por ID
     Optional<Cliente> obtenerPorId(Long id);
-
-    // Buscar cliente por documento
     Cliente obtenerPorDocumento(String documentoIdentidad);
-
-    // Eliminar cliente por ID
     void eliminarCliente(Long id);
-
-    // Cambiar estado (activar o desactivar)
     void cambiarEstado(Long id, boolean estado);
+
+    // === FILTROS ERP ===
+    List<Cliente> listarActivos();
+    List<Cliente> listarMorosos();
+    List<Cliente> listarPorTipo(String cliente, String tipoCliente);
+
+    // === BÚSQUEDA AVANZADA ===
+    List<Cliente> buscarPorNombre(String texto);
+    List<Cliente> buscarPorRazonSocial(String texto);
+
+    // === GESTIÓN DE DEUDA ===
+    void registrarVenta(Long idCliente, BigDecimal monto);
+    void registrarPago(Long idCliente, BigDecimal monto);
+    void actualizarDeuda(Long idCliente, BigDecimal monto);
 }
