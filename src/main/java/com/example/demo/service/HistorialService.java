@@ -10,7 +10,7 @@ import java.util.List;
 public interface HistorialService {
 
     // Crear entrada (automático o manual)
-    Historial registrar(Cliente cliente, Usuario usuario, String tipoInteraccion, String detalle);
+    Historial registrar(Cliente cliente, String creadorPorNombre, String tipoInteraccion, String detalle);
 
     // Listar por cliente
     List<Historial> listarPorCliente(Long idCliente);

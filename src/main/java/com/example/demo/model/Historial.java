@@ -22,9 +22,8 @@ public class Historial {
     @Column(name = "creado_en", nullable = false, updatable = false)
     private LocalDateTime creadoEn = LocalDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creado_por", updatable = false)
-    private Usuario creadoPor;
+    @Column(name = "creado_por", updatable = false)
+    private String creadoPorNombre;
 
     @NotBlank(message = "Debe seleccionar el tipo de interacción")
     @Pattern(regexp = "consulta|compra|reclamo|devolucion",
@@ -40,23 +39,23 @@ public class Historial {
 
     public Historial() {}
 
-    public Historial(Cliente cliente, Usuario creadoPor, String tipoInteraccion, String detalle) {
+    public Historial(Cliente cliente, String creadoPorNombre, String tipoInteraccion, String detalle) {
         this.cliente = cliente;
-        this.creadoPor = creadoPor;
+        this.creadoPorNombre = creadoPorNombre;
         this.tipoInteraccion = tipoInteraccion;
         this.detalle = detalle;
     }
 
-    // GETTERS (sin setter para creadoEn)
+// GETTERS (sin setter para creadoEn)
 
     public Long getIdHistorial() { return idHistorial; }
     public Cliente getCliente() { return cliente; }
     public LocalDateTime getCreadoEn() { return creadoEn; }
-    public Usuario getCreadoPor() { return creadoPor; }
+    public String getCreadoPorNombre() { return creadoPorNombre; }
     public String getTipoInteraccion() { return tipoInteraccion; }
     public String getDetalle() { return detalle; }
 
-    // Setters (solo para campos editables)
+    // Setters
     public void setTipoInteraccion(String tipoInteraccion) { this.tipoInteraccion = tipoInteraccion; }
     public void setDetalle(String detalle) { this.detalle = detalle; }
 

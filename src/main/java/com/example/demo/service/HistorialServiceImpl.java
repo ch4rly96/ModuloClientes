@@ -18,24 +18,19 @@ public class HistorialServiceImpl implements HistorialService {
     private HistorialRepository historialRepository;
 
     @Override
-    public Historial registrar(Cliente cliente, Usuario usuario, String tipoInteraccion, String detalle) {
-        validarEntrada(cliente, usuario, tipoInteraccion, detalle);
+    public Historial registrar(Cliente cliente, String creadoPorNombre, String tipo, String detalle) {
+        validarEntrada(cliente, creadoPorNombre, tipo, detalle);
 
-        Historial entrada = new Historial();
-        entrada.setCliente(cliente);
-        entrada.setCreadoPor(usuario);
-        entrada.setTipoInteraccion(tipoInteraccion);
-        entrada.setDetalle(detalle);
-
+        Historial entrada = new Historial(cliente, creadoPorNombre, tipo, detalle);
         return historialRepository.save(entrada);
     }
 
-    private void validarEntrada(Cliente cliente, Usuario usuario, String tipo, String detalle) {
+    private void validarEntrada(Cliente cliente, String creadoPorNombre, String tipo, String detalle) {
         if (cliente == null || cliente.getIdCliente() == null) {
             throw new IllegalArgumentException("Cliente inválido.");
         }
-        if (usuario == null) {
-            throw new IllegalArgumentException("Usuario requerido para auditoría.");
+        if (StringUtils.isBlank(creadoPorNombre)) {
+            throw new IllegalArgumentException("Nombre de usuario requerido.");
         }
         if (StringUtils.isBlank(tipo)) {
             throw new IllegalArgumentException("Tipo de interacción requerido.");
