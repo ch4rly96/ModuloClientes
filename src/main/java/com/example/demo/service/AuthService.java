@@ -60,7 +60,7 @@ public class AuthService {
         usuario.setNombre(request.nombre());
         usuario.setRoles(roles);
 
-        usuarioService.crearUsuario(usuario);
+        usuarioService.crearUsuario(usuario);;
 
         String token = jwtUtil.generateToken(usuario.getUsername(), request.roles());
         return new AuthResponse(token, usuario.getNombre(), request.roles());

@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,14 +31,20 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = header.substring(7);
             if (jwtService.esValido(token)) {
                 String username = jwtService.obtenerUsername(token);
-                var roles = jwtService.obtenerRoles(token).stream()
+                Set<String> rolesDelToken = jwtService.obtenerRoles(token);
+                System.out.println("USUARIO: " + username);
+                System.out.println("ROLES DEL TOKEN: " + rolesDelToken);
+
+                var authorities = rolesDelToken.stream()
                         .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
                         .collect(Collectors.toList());
+                System.out.println("AUTHORITIES CREADAS: " + authorities);
 
                 var auth = new UsernamePasswordAuthenticationToken(
-                        username, null, roles);
+                        username, null, authorities);
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                System.out.println("AUTENTICACIÓN GUARDADA: " + SecurityContextHolder.getContext().getAuthentication());
             }
         }
         chain.doFilter(request, response);

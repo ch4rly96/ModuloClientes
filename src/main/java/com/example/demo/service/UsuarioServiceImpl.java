@@ -23,7 +23,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (existeUsername(usuario.getUsername())) {
             throw new RuntimeException("El usuario ya existe");
         }
-        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
 
