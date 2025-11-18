@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body>
+<div th:fragment="footer" class="mt-5 py-4 bg-light border-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <small class="text-muted">
+                    © <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2025</span>
+                    Módulo de Clientes - Todos los derechos reservados.
+                </small>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <small class="text-muted">
+                    Desarrollado con
+                    <i class="bi bi-heart-fill text-danger"></i>
+                    en Perú
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

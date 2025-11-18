@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body>
+<div th:fragment="content" class="p-4">
+    <!-- TÍTULO -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </h1>
+        <small class="text-muted">Última actualización: <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}">16/11/2025</span></small>
+    </div>
+
+    <!-- TARJETAS DE MÉTRICAS -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-people display-4 text-primary"></i>
+                    <h2 class="mt-3 mb-0" th:text="${totalClientes}">2,548</h2>
+                    <p class="text-muted mb-0">Total de Clientes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle display-4 text-success"></i>
+                    <h2 class="mt-3 mb-0" th:text="${clientesActivos}">1,892</h2>
+                    <p class="text-muted mb-0">Clientes Activos</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-star display-4 text-warning"></i>
+                    <h2 class="mt-3 mb-0" th:text="${clientesFielizados}">1,245</h2>
+                    <p class="text-muted mb-0">Clientes en Fielización</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle display-4 text-danger"></i>
+                    <h2 class="mt-3 mb-0" th:text="${clientesMorosos}">342</h2>
+                    <p class="text-muted mb-0">Clientes Morosos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICA DE SEGMENTACIÓN -->
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">
+                <i class="bi bi-pie-chart"></i> Segmentación de Clientes por Tipo
+            </h5>
+        </div>
+        <div class="card-body">
+            <canvas id="chartSegmentacion" height="100"></canvas>
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <span class="badge bg-primary">Natural: 45%</span>
+                    <span class="badge bg-success ms-2">Jurídico: 30%</span>
+                    <span class="badge bg-warning ms-2">Colectivo: 25%</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENTES RECIENTES -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-clock-history"></i> Clientes Recientes
+            </h5>
+            <a th:href="@{/clientes}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Fecha Registro</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="cliente : ${clientesRecientes}">
+                        <td th:text="${cliente.id}">10239</td>
+                        <td th:text="${cliente.nombres + ' ' + cliente.apellidos}">Juan Pérez Rodríguez</td>
+                        <td>
+                            <span class="badge bg-primary" th:text="${cliente.tipoCliente}">Natural</span>
+                        </td>
+                        <td th:text="${#dates.format(cliente.fechaRegistro, 'dd/MM/yyyy')}">15/03/2023</td>
+                        <td>
+                                <span class="badge"
+                                      th:class="${cliente.estado} ? 'bg-success' : 'bg-secondary'"
+                                      th:text="${cliente.estado} ? 'Activo' : 'Inactivo'">Activo</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye"></i> Ver
+                            </button>
+                        </td>
+                    </tr>
+                    <!-- Más filas... -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

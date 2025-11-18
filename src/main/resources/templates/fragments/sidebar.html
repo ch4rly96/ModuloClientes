@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body>
+<div th:fragment="sidebar" class="pt-3">
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a th:href="@{/home}" class="nav-link link-dark" th:classappend="${#request.requestURI.endsWith('/home') ? 'active' : ''}">
+                <i class="bi bi-house"></i> Inicio
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/clientes}" class="nav-link link-dark" th:classappend="${#request.requestURI.contains('/clientes') ? 'active' : ''}">
+                <i class="bi bi-people"></i> Clientes
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/reclamos}" class="nav-link link-dark">
+                <i class="bi bi-exclamation-triangle"></i> Reclamos
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/reportes}" class="nav-link link-dark">
+                <i class="bi bi-graph-up"></i> Reportes
+            </a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
