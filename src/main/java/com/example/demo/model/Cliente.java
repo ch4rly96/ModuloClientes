@@ -36,7 +36,7 @@ public class Cliente {
 
     @NotBlank(message = "Debe seleccionar el tipo de documento")
     @Column(nullable = false)
-    private String tipoDocumento; // DNI, RUC, CE, PAS
+    private String tipoDocumento; // DNI, RUC, CE,
 
     @NotBlank(message = "El número de documento es obligatorio")
     @Column(nullable = false, unique = true)

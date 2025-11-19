@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,12 +39,20 @@ public class JwtService {
     }
 
     public Set<String> obtenerRoles(String token) {
-        return (Set<String>) Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("roles");
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            List<String> roles = claims.get("roles", List.class);
+            return roles != null
+                    ? roles.stream().collect(Collectors.toSet())
+                    : Set.of();
+        } catch (Exception e) {
+            return Set.of();
+        }
     }
 
     public boolean esValido(String token) {
