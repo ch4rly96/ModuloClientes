@@ -23,24 +23,29 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
 
-                        // GET: listar y ver
+                        // 1. PRIMERO: RUTAS WEB PÚBLICAS
+                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+
+                        // 2. SEGUNDO: RUTAS WEB PROTEGIDAS (solo usuarios autenticados con sesión)
+                        .requestMatchers("/home", "/home/**", "/clientes", "/clientes/**", "/reclamos", "/reclamos/**", "/reportes", "/reportes/**")
+                        .authenticated()
+
+                        // 3. TERCERO: API AUTH (permitido para todos)
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // 4. CUARTO: API CLIENTES POR MÉTODO (con roles)
                         .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyRole("ADMIN", "VENDEDOR")
-
-                        // POST: crear
                         .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasRole("ADMIN")
-
-                        // PUT: actualizar
                         .requestMatchers(HttpMethod.PUT, "/api/clientes/**").hasRole("ADMIN")
-
-                        // DELETE: eliminar
                         .requestMatchers(HttpMethod.DELETE, "/api/clientes/**").hasRole("ADMIN")
 
-                        // Otros endpoints
+                        // 5. OTROS ENDPOINTS API
                         .requestMatchers("/reclamos/**").hasAnyRole("ADMIN", "CAJERO", "SUPERVISOR")
+
+                        // 6. ÚLTIMO: TODO LO DEMÁS
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
