@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -12,25 +13,24 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUsuario;
 
-    @NotBlank
-    @Size(min = 4, max = 20)
+    @NotBlank @Size(min = 4, max = 20)
     @Column(unique = true, nullable = false)
     private String username;
 
-    @NotBlank
-    @Size(min = 60, max = 60) // BCrypt
+    @NotBlank @Size(min = 60, max = 60)
     @Column(nullable = false)
     private String password;
 
-    @NotBlank
-    @Size(max = 100)
+    @NotBlank @Size(max = 100)
     private String nombre;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "id_usuario"))
-    @Column(name = "rol")
-    @Enumerated(EnumType.STRING)
-    private Set<Rol> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "usuarios_roles",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "rol_id")
+    )
+    private Set<Rol> roles = new HashSet<>();
 
     @Column(nullable = false)
     private boolean activo = true;
@@ -39,23 +39,60 @@ public class Usuario {
 
     public Usuario() {}
 
-    public Usuario(String username, String password, String nombre, Set<Rol> roles) {
+    public Usuario(Long idUsuario, String username, String password, String nombre, Set<Rol> roles, boolean activo) {
+        this.idUsuario = idUsuario;
         this.username = username;
         this.password = password;
         this.nombre = nombre;
         this.roles = roles;
+        this.activo = activo;
     }
 
-    // GETTERS Y SETTERS
-    public Long getIdUsuario() { return idUsuario; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public Set<Rol> getRoles() { return roles; }
-    public void setRoles(Set<Rol> roles) { this.roles = roles; }
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Long getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Set<Rol> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Rol> roles) {
+        this.roles = roles;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 }
