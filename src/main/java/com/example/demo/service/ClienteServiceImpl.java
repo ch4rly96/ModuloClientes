@@ -92,12 +92,16 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     public List<Cliente> buscarPorNombre(String texto) {
-        return clienteRepository.findByNombresContainingIgnoreCaseOrApellidosContainingIgnoreCase(texto, texto);
+        return texto == null || texto.isBlank()
+                ? clienteRepository.findAll()
+                : clienteRepository.buscarPorNombre("%" + texto.trim() + "%");
     }
 
     @Override
     public List<Cliente> buscarPorRazonSocial(String texto) {
-        return clienteRepository.findByRazonSocialContainingIgnoreCase(texto);
+        return texto == null || texto.isBlank()
+                ? clienteRepository.findAll()
+                : clienteRepository.buscarPorRazonSocial("%" + texto.trim() + "%");
     }
 
     // === ESTADO Y ELIMINACIÓN ===

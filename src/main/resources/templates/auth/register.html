@@ -33,7 +33,13 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Contraseña</label>
-                <input type="password" class="form-control" th:field="*{password}" required>
+                <div class="input-group">
+                <input type="password" class="form-control" id="passwordRegister"  th:field="*{password}" required>
+                <span class="input-group-text" style="cursor: pointer;"
+                      onclick="togglePassword('passwordRegister', 'eyeRegister')">
+                    <i class="bi bi-eye" id="eyeRegister"></i>
+                </span>
+                </div>
             </div>
             <div class="mb-4">
                 <label class="form-label">Rol</label>
@@ -52,11 +58,34 @@
         </form>
 
         <div class="text-center mt-4">
-            <a th:href="@{/auth/login}" class="text-decoration-none">
-                ¿Ya tienes cuenta? Inicia sesión aquí
-            </a>
+            <p>¿Ya tienes cuenta?
+                <a th:href="@{/auth/login}" class="text-blue fw-bold"> Inicia sesión aquí</a>
+            </p>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    window.togglePassword = function(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const eyeIcon = document.getElementById(iconId);
+
+        if (!passwordInput || !eyeIcon) {
+            console.error("No se encontró el input o el icono:", inputId, iconId);
+            return;
+        }
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            eyeIcon.classList.replace("bi-eye", "bi-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            eyeIcon.classList.replace("bi-eye-slash", "bi-eye");
+        }
+    };
+});
+</script>
 </body>
 </html>

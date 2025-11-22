@@ -32,8 +32,15 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain chain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
+        String method = request.getMethod();
 
-        // 1. RUTAS ESTÁTICAS Y PÚBLICAS → nada que hacer
+        if ("/logout".equals(path) && "POST".equals(method)) {
+            System.out.println("LOGOUT DETECTADO – SALTANDO JWT");
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // 1. RUTAS ESTÁTICAS Y PÚBLICAS
         if (path.startsWith("/auth/") ||
                 path.startsWith("/css/") ||
                 path.startsWith("/js/") ||
@@ -52,7 +59,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
             HttpSession session = request.getSession(false);
             if (session != null && session.getAttribute("token") != null) {
-                // Creamos autenticación para que Spring Security esté feliz
                 String username = (String) session.getAttribute("nombreUsuario");
                 var auth = new UsernamePasswordAuthenticationToken(
                         username,

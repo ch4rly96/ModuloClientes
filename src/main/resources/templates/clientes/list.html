@@ -2,51 +2,104 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Lista de Clientes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Gestión de Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Clientes Registrados</h2>
-        <a href="/clientes/nuevo" class="btn btn-primary">+ Cliente nuevo</a>
+    <h1 class="mb-4 text-primary"><i class="bi bi-people-fill"></i> Gestión de Clientes</h1>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <div class="mb-4">
+        <a href="/home" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Volver al Dashboard
+        </a>
     </div>
 
-    <table class="table table-striped table-hover shadow">
-        <thead class="table-primary text-center">
-        <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Nombre/Razón Social</th>
-            <th>Documento</th>
-            <th>Email</th>
-            <th>Teléfono</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody class="text-center" th:each="cliente : ${clientes}">
-        <tr>
-            <td th:text="${cliente.idCliente}"></td>
-            <td th:text="${cliente.tipoCliente}"></td>
-            <td th:text="${cliente.tipoCliente == 'Empresa' ? (cliente.razonSocial != null ? cliente.razonSocial : '-')
-           : (cliente.nombres != null ? cliente.nombres : '') + ' ' + (cliente.apellidos != null ? cliente.apellidos : '')}"></td>
-            <td th:text="${cliente.documentoIdentidad}"></td>
-            <td th:text="${cliente.email}"></td>
-            <td th:text="${cliente.telefono}"></td>
-            <td>
-                <span th:text="${cliente.estado ? 'Activo' : 'Inactivo'}"
-                      th:classappend="${cliente.estado ? 'text-success' : 'text-danger'}"></span>
-            </td>
-            <td>
-                <a th:href="@{'/clientes/ver/' + ${cliente.idCliente}}" class="btn btn-info btn-sm">Ver</a>
-                <a th:href="@{'/clientes/editar/' + ${ciente.idCliente}}" class="btn btn-primary btn-sm">Editar</a>
-                <a th:href="@{'/clientes/eliminar/' + ${cliente.idCliente}}" class="btn btn-danger btn-sm"
-                   onclick="return confirm('¿Desea eliminar este cliente?')">Eliminar</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/clientes}" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o razón social..."
+                           th:value="${q}">
+                </div>
+                <div class="col-md-3">
+                    <select name="filtro" class="form-select">
+                        <option value="todos" th:selected="${filtro == 'todos'}">Todos</option>
+                        <option value="persona" th:selected="${filtro == 'persona'}">Personas</option>
+                        <option value="empresa" th:selected="${filtro == 'empresa'}">Empresas</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary"><i class="bi bi-search"></i> Buscar</button>
+                    <a th:href="@{/clientes/nuevo}" class="btn btn-success ms-2">
+                        <i class="bi bi-plus-circle"></i> Nuevo Cliente
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Nombre / Razón Social</th>
+                        <th>Doc.</th>
+                        <th>Teléfono</th>
+                        <th>Deuda</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${clientes}">
+                        <td>
+                            <span th:text="${c.cliente}"></span>
+                            <small class="text-muted d-block" th:text="${c.tipoCliente}"></small>
+                        </td>
+                        <td>
+                            <strong th:text="${c.cliente == 'persona' ? c.nombres + ' ' + c.apellidos : c.razonSocial}"></strong>
+                        </td>
+                        <td th:text="${c.documentoIdentidad}"></td>
+                        <td th:text="${c.telefono ?: '—'}"></td>
+                        <td>
+                            <span th:if="${c.deudaActual > 0}" class="badge bg-danger">
+                                S/ <span th:text="${c.deudaActual}"></span>
+                            </span>
+                            <span th:if="${c.deudaActual == 0}" class="text-success">Al día</span>
+                        </td>
+                        <td>
+                            <span th:if="${c.estado}" class="badge bg-success">Activo</span>
+                            <span th:if="${!c.estado}" class="badge bg-secondary">Inactivo</span>
+                            <span th:if="${c.esMoroso}" class="badge bg-warning text-dark">Moroso</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/clientes/detalle/{id}(id=${c.idCliente})}" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a th:href="@{/clientes/editar/{id}(id=${c.idCliente})}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a th:href="@{/clientes/estado/{id}(id=${c.idCliente})}"
+                               class="btn btn-sm" th:classappend="${c.estado} ? 'btn-secondary' : 'btn-success'">
+                                <i th:class="${c.estado} ? 'bi bi-x-circle' : 'bi bi-check-circle'"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
