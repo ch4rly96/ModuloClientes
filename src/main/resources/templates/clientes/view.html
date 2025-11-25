@@ -15,10 +15,15 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>Tipo:</strong> <span th:text="${cliente.cliente}"></span> / <span th:text="${cliente.tipoCliente}"></span></p>
-                    <p><strong>Nombre Completo:</strong>
-                        <span th:text="${cliente.cliente == 'persona' ? cliente.nombres + ' ' + cliente.apellidos : cliente.razonSocial}"></span>
-                    </p>
+                    <p> <strong>Tipo:</strong>
+                        <span class="badge bg-primary" th:text="${cliente.tipoCliente}"></span> →
+                        <span class="text-muted" th:text="${cliente.subtipoCliente}"></span> </p>
+                    <p> <strong>Nombre Completo:</strong>
+                        <span th:text="${
+                            cliente.tipoCliente == 'persona'
+                                ? (cliente.nombres != null ? cliente.nombres + ' ' : '') + (cliente.apellidos != null ? cliente.apellidos : '')
+                                : (cliente.razonSocial != null ? cliente.razonSocial : 'Sin razón social')
+                        }"></span> </p>
                     <p><strong>Documento:</strong> <span th:text="${cliente.tipoDocumento + ' ' + cliente.documentoIdentidad}"></span></p>
                     <p><strong>Email:</strong> <span th:text="${cliente.email ?: 'No registrado'}"></span></p>
                     <p><strong>Teléfono:</strong> <span th:text="${cliente.telefono ?: 'No registrado'}"></span></p>

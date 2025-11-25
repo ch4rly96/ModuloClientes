@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.Cliente;
 import com.example.demo.repository.ClienteRepository;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,42 +19,40 @@ public class ClienteServiceImpl implements ClienteService {
 
     // === GUARDAR CLIENTE CON VALIDACIÓN ===
     @Override
+    @Transactional
     public Cliente guardarCliente(Cliente cliente) {
         validarCliente(cliente);
         return clienteRepository.save(cliente);
     }
 
     private void validarCliente(Cliente cliente) {
-        if (StringUtils.isBlank(cliente.getCliente())) {
+        if (StringUtils.isBlank(cliente.getTipoCliente())) {
             throw new IllegalArgumentException("Debe seleccionar si es persona o empresa.");
         }
 
-        if ("persona".equalsIgnoreCase(cliente.getCliente())) {
+        if ("persona".equalsIgnoreCase(cliente.getSubtipoCliente())) {
             if (!"natural".equals(cliente.getTipoCliente())) {
                 throw new IllegalArgumentException("Una persona debe ser de tipo 'natural'.");
             }
             if (StringUtils.isBlank(cliente.getNombres()) || StringUtils.isBlank(cliente.getApellidos())) {
                 throw new IllegalArgumentException("Nombre y apellido son obligatorios para personas.");
             }
-            cliente.setRazonSocial(null);
         }
-        else if ("empresa".equalsIgnoreCase(cliente.getCliente())) {
+        else if ("empresa".equalsIgnoreCase(cliente.getSubtipoCliente())) {
             if (!List.of("juridico", "constructor", "corporativo").contains(cliente.getTipoCliente())) {
                 throw new IllegalArgumentException("Tipo de empresa inválido. Use: jurídico, constructor o corporativo.");
             }
             if (StringUtils.isBlank(cliente.getRazonSocial())) {
                 throw new IllegalArgumentException("La razón social es obligatoria para empresas.");
             }
-            cliente.setNombres(null);
-            cliente.setApellidos(null);
         }
 
         // Validar tipo de documento
-        if ("persona".equalsIgnoreCase(cliente.getCliente()) &&
+        if ("persona".equalsIgnoreCase(cliente.getTipoCliente()) &&
                 !List.of("DNI", "CE").contains(cliente.getTipoDocumento())) {
             throw new IllegalArgumentException("Personas solo pueden tener DNI o CE.");
         }
-        if ("empresa".equalsIgnoreCase(cliente.getCliente()) && !"RUC".equals(cliente.getTipoDocumento())) {
+        if ("empresa".equalsIgnoreCase(cliente.getTipoCliente()) && !"RUC".equals(cliente.getTipoDocumento())) {
             throw new IllegalArgumentException("Empresas deben tener RUC.");
         }
     }
@@ -75,8 +74,11 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public List<Cliente> listarPorTipo(String cliente, String tipoCliente) {
-        return clienteRepository.findByClienteAndTipoCliente(cliente, tipoCliente);
+    public List<Cliente> listarPorTipo(String tipoCliente, String subtipoCliente) {
+        if (subtipoCliente == null || subtipoCliente.isBlank()) {
+            return clienteRepository.findByTipoCliente(tipoCliente);
+        }
+        return clienteRepository.findByTipoClienteAndSubtipoCliente(tipoCliente, subtipoCliente);
     }
 
     // === BÚSQUEDA ===

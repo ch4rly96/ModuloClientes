@@ -62,11 +62,18 @@
                     <tbody>
                     <tr th:each="c : ${clientes}">
                         <td>
-                            <span th:text="${c.cliente}"></span>
-                            <small class="text-muted d-block" th:text="${c.tipoCliente}"></small>
+                            <span class="badge"
+                                  th:class="${c.tipoCliente == 'persona'} ? 'bg-info' : 'bg-primary'"
+                                  th:text="${c.tipoCliente == 'persona' ? 'PERSONA' : 'EMPRESA'}">
+                            </span>
+                            <small class="text-muted d-block" th:text="${c.subtipoCliente}"></small>
                         </td>
                         <td>
-                            <strong th:text="${c.cliente == 'persona' ? c.nombres + ' ' + c.apellidos : c.razonSocial}"></strong>
+                            <strong th:text="${
+                                c.tipoCliente == 'persona'
+                                    ? (c.nombres != null ? c.nombres + ' ' : '') + (c.apellidos != null ? c.apellidos : '')
+                                    : (c.razonSocial != null ? c.razonSocial : 'Sin razón social')
+                            }"></strong>
                         </td>
                         <td th:text="${c.documentoIdentidad}"></td>
                         <td th:text="${c.telefono ?: '—'}"></td>

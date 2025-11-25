@@ -61,21 +61,39 @@ public class ClienteWebController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@Valid @ModelAttribute Cliente cliente,
+    public String guardar(@ModelAttribute Cliente cliente,
                           BindingResult result,
                           RedirectAttributes flash,
                           Model model) {
+
+        // === VALIDACIÓN PERSONALIZADA PARA TIPOCLIENTE ===
+        if ("empresa".equals(cliente.getTipoCliente())) {
+            if (cliente.getSubtipoCliente() == null || cliente.getSubtipoCliente().isBlank()) {
+                result.rejectValue("subtipoCliente", "", "Debe seleccionar el subtipo para empresa");
+            }
+        }
+
+        // Si es persona, forzamos "natural" automáticamente (opcional, pero recomendado)
+        if ("persona".equals(cliente.getTipoCliente())) {
+            cliente.setSubtipoCliente("natural");
+        }
+
+        // === SI HAY ERRORES, VUELVE AL FORMULARIO ===
         if (result.hasErrors()) {
             model.addAttribute("cliente", cliente);
             return "clientes/form";
         }
+
+        // === GUARDAR ===
         try {
             clienteService.guardarCliente(cliente);
-            flash.addFlashAttribute("success", "Cliente guardado con éxito");
+            flash.addFlashAttribute("success",
+                    cliente.getIdCliente() != null ? "Cliente actualizado con éxito" : "Cliente creado con éxito");
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("error", "Error al guardar: " + e.getMessage());
             return "clientes/form";
         }
+
         return "redirect:/clientes";
     }
 

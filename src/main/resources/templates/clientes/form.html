@@ -22,41 +22,41 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">¿Es Persona o Empresa?</label>
-                                <select class="form-select" th:field="*{cliente}" required onchange="toggleClienteForm()">
-                                    <option value="persona" th:selected="${cliente.cliente == 'persona'}">Persona Natural</option>
-                                    <option value="empresa" th:selected="${cliente.cliente == 'empresa'}">Empresa</option>
+                                <select class="form-select" th:field="*{tipoCliente}" required onchange="toggleClienteForm()">
+                                    <option value="persona" th:selected="${cliente.tipoCliente == 'persona'}">Persona Natural</option>
+                                    <option value="empresa" th:selected="${cliente.tipoCliente == 'empresa'}">Empresa</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Subtipo</label>
-                                <select class="form-select" th:field="*{tipoCliente}" required>
-                                    <option value="natural" th:disabled="${cliente.cliente == 'empresa'}">Natural</option>
-                                    <option value="juridico" th:disabled="${cliente.cliente == 'persona'}">Jurídico</option>
-                                    <option value="constructor" th:disabled="${cliente.cliente == 'persona'}">Constructor</option>
-                                    <option value="corporativo" th:disabled="${cliente.cliente == 'persona'}">Corporativo</option>
+                                <select class="form-select" th:field="*{subtipoCliente}" required>
+                                    <option value="natural" th:disabled="${cliente.tipoCliente == 'empresa'}">Natural</option>
+                                    <option value="juridico" th:disabled="${cliente.tipoCliente == 'persona'}">Jurídico</option>
+                                    <option value="constructor" th:disabled="${cliente.tipoCliente == 'persona'}">Constructor</option>
+                                    <option value="corporativo" th:disabled="${cliente.tipoCliente == 'persona'}">Corporativo</option>
                                 </select>
                             </div>
                         </div>
 
                         <!-- PERSONA -->
-                        <div id="personaFields" th:if="${cliente.cliente == 'persona' or cliente.cliente == null}">
+                        <div id="personaFields" th:if="${cliente.tipoCliente == 'persona' or cliente.tipoCliente == null}">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label>Nombres</label>
-                                    <input type="text" class="form-control" th:field="*{nombres}" required>
+                                    <input type="text" class="form-control" th:field="*{nombres}">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label>Apellidos</label>
-                                    <input type="text" class="form-control" th:field="*{apellidos}" required>
+                                    <input type="text" class="form-control" th:field="*{apellidos}">
                                 </div>
                             </div>
                         </div>
 
                         <!-- EMPRESA -->
-                        <div id="empresaFields" th:if="${cliente.cliente == 'empresa'}">
+                        <div id="empresaFields" th:if="${cliente.tipoCliente == 'empresa'}">
                             <div class="mb-3">
                                 <label>Razón Social</label>
-                                <input type="text" class="form-control" th:field="*{razonSocial}" required>
+                                <input type="text" class="form-control" th:field="*{razonSocial}">
                             </div>
                         </div>
 
@@ -108,15 +108,40 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!--
 <script>
-    function toggleClienteForm() {
-        const tipo = document.querySelector('[name="cliente"]').value;
-        document.getElementById("personaFields").style.display = tipo === "persona" ? "block" : "none";
-        document.getElementById("empresaFields").style.display = tipo === "empresa" ? "block" : "none";
-    }
-    // Ejecutar al cargar
-    document.addEventListener("DOMContentLoaded", toggleClienteForm);
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectTipo = document.querySelector('select[name="tipoCliente"]');
+        const selectSubtipo = document.querySelector('select[name="subtipoCliente"]');
+
+        function actualizarSubtipo() {
+            const tipo = selectTipo.value;
+
+            // Limpiar y habilitar según tipo
+            selectSubtipo.innerHTML = '';
+
+            if (tipo === 'persona') {
+                selectSubtipo.innerHTML = '<option value="natural">Natural</option>';
+                selectSubtipo.value = 'natural';
+            } else if (tipo === 'empresa') {
+                selectSubtipo.innerHTML = `
+                    <option value="">-- Seleccione subtipo --</option>
+                    <option value="juridico">Jurídico</option>
+                    <option value="constructor">Constructor</option>
+                    <option value="corporativo">Corporativo</option>
+                `;
+                selectSubtipo.value = '';
+            }
+
+            // Hacer obligatorio solo si es empresa
+            selectSubtipo.required = (tipo === 'empresa');
+        }
+
+        selectTipo.addEventListener('change', actualizarSubtipo);
+        actualizarSubtipo(); // Ejecutar al cargar
+    });
 </script>
+-->
 </body>
 </html>
 

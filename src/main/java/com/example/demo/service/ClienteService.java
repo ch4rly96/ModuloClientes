@@ -18,7 +18,7 @@ public interface ClienteService {
     // === FILTROS ERP ===
     List<Cliente> listarActivos();
     List<Cliente> listarMorosos();
-    List<Cliente> listarPorTipo(String cliente, String tipoCliente);
+    List<Cliente> listarPorTipo(String tipoCliente, String subtipoCliente);
 
     // === BÚSQUEDA AVANZADA ===
     List<Cliente> buscarPorNombre(String texto);

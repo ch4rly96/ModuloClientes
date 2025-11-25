@@ -16,12 +16,12 @@ public class Cliente {
     private Long idCliente;
 
     @NotBlank(message = "Debe seleccionar si es persona o empresa")
-    @Column(nullable = false)
-    private String cliente; // 'persona' o 'empresa'
+    @Column(name = "tipo_cliente", nullable = false)
+    private String tipoCliente; // 'persona' o 'empresa'
 
     @NotBlank(message = "Debe seleccionar el subtipo de cliente")
-    @Column(name = "tipo_cliente", nullable = false)
-    private String tipoCliente; // 'natural', 'juridico', 'constructor', 'corporativo'
+    @Column(name = "subtipo_cliente", nullable = false)
+    private String subtipoCliente; // 'natural', 'juridico', 'constructor', 'corporativo'
 
     // DATOS PERSONALES / EMPRESA
 
@@ -82,21 +82,21 @@ public class Cliente {
 
     public Cliente() {}
 
-    public Cliente(String cliente, String tipoCliente) {
-        this.cliente = cliente;
+    public Cliente(String tipoCliente, String subtipoCliente) {
         this.tipoCliente = tipoCliente;
+        this.subtipoCliente = subtipoCliente;
     }
 
-    // GETTERS Y SETTERS
+// GETTERS Y SETTERS
 
     public Long getIdCliente() { return idCliente; }
     public void setIdCliente(Long idCliente) { this.idCliente = idCliente; }
 
-    public String getCliente() { return cliente; }
-    public void setCliente(String cliente) { this.cliente = cliente; }
+    public String getTipoCliente() { return tipoCliente;}
+    public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente;}
 
-    public String getTipoCliente() { return tipoCliente; }
-    public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente; }
+    public String getSubtipoCliente() { return subtipoCliente; }
+    public void setSubtipoCliente(String subtipoCliente) { this.subtipoCliente = subtipoCliente; }
 
     public String getNombres() { return nombres; }
     public void setNombres(String nombres) { this.nombres = nombres; }
@@ -143,7 +143,7 @@ public class Cliente {
     // METODO AUXILIAR: Nombre completo o razon social
 
     public String getNombreCompleto() {
-        if ("persona".equalsIgnoreCase(cliente)) {
+        if ("persona".equalsIgnoreCase(tipoCliente)) {
             return String.join(" ",
                     nombres != null ? nombres.trim() : "",
                     apellidos != null ? apellidos.trim() : ""
@@ -157,8 +157,8 @@ public class Cliente {
     public String toString() {
         return "Cliente{" +
                 "idCliente=" + idCliente +
-                ", cliente='" + cliente + '\'' +
                 ", tipoCliente='" + tipoCliente + '\'' +
+                ", subtipoCliente='" + subtipoCliente + '\'' +
                 ", nombreCompleto='" + getNombreCompleto() + '\'' +
                 ", documentoIdentidad='" + documentoIdentidad + '\'' +
                 ", email='" + email + '\'' +

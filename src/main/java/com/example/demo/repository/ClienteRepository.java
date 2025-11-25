@@ -21,8 +21,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     List<Cliente> findByEsMorosoTrueOrderByDeudaActualDesc(); // morosos ordenados por deuda
 
     // === BÚSQUEDA POR TIPO ===
-    List<Cliente> findByClienteAndTipoCliente(String cliente, String tipoCliente);
-    List<Cliente> findByCliente(String cliente); // todos los persona o empresa
+    List<Cliente> findByTipoClienteAndSubtipoCliente(String tipoCliente, String subtipoCliente);
+    List<Cliente> findByTipoCliente(String tipocliente); // todos los persona o empresa
 
     // === BÚSQUEDA AVANZADA ===
     @Query(value = "SELECT * FROM clientes c WHERE unaccent(c.nombres) ILIKE unaccent(:texto) OR unaccent(c.apellidos) ILIKE unaccent(:texto)", nativeQuery = true)

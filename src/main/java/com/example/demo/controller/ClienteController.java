@@ -35,11 +35,11 @@ public class ClienteController {
         return ResponseEntity.ok(clienteService.listarMorosos());
     }
 
-    @GetMapping("/tipo/{cliente}/{tipoCliente}")
+    @GetMapping("/tipo/{tipoCliente}/{subtipoCliente}")
     public ResponseEntity<List<Cliente>> obtenerPorTipo(
-            @PathVariable String cliente,
-            @PathVariable String tipoCliente) {
-        return ResponseEntity.ok(clienteService.listarPorTipo(cliente, tipoCliente));
+            @PathVariable String tipoCliente,
+            @PathVariable String subtipoCliente) {
+        return ResponseEntity.ok(clienteService.listarPorTipo(tipoCliente, subtipoCliente));
     }
 
     // 2. BUSQUEDA
@@ -85,8 +85,8 @@ public class ClienteController {
         return clienteService.obtenerPorId(id)
                 .map(clienteExistente -> {
                     // Actualizar campos permitidos
-                    clienteExistente.setCliente(clienteActualizado.getCliente());
                     clienteExistente.setTipoCliente(clienteActualizado.getTipoCliente());
+                    clienteExistente.setSubtipoCliente(clienteActualizado.getSubtipoCliente());
                     clienteExistente.setNombres(clienteActualizado.getNombres());
                     clienteExistente.setApellidos(clienteActualizado.getApellidos());
                     clienteExistente.setRazonSocial(clienteActualizado.getRazonSocial());
