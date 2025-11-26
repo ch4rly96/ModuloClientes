@@ -19,37 +19,44 @@ public class ReclamoController {
         this.clienteService = clienteService;
     }
 
+    // LISTA
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("reclamos", reclamoService.listarTodos());
-        return "reclamos/lista";
+        return "reclamos/list";   // busca list.html
     }
 
+    // NUEVO FORM
     @GetMapping("/nuevo")
     public String nuevoForm(Model model) {
         model.addAttribute("reclamo", new Reclamo());
         model.addAttribute("clientes", clienteService.listarClientes());
-        return "reclamos/formulario";
+        return "reclamos/form";    // form.html
     }
 
+    // GUARDAR
     @PostMapping
     public String guardar(@ModelAttribute Reclamo reclamo, @RequestParam String usuarioNombre) {
         reclamoService.crearReclamo(reclamo, usuarioNombre);
         return "redirect:/reclamos";
     }
 
+    // DETALLE
     @GetMapping("/{id}")
     public String ver(@PathVariable Long id, Model model) {
         model.addAttribute("reclamo", reclamoService.obtenerPorId(id));
-        return "reclamos/detalle";
+        return "reclamos/view";    // view.html
     }
 
+    // EDITAR FORM
     @GetMapping("/{id}/editar")
     public String editarForm(@PathVariable Long id, Model model) {
         model.addAttribute("reclamo", reclamoService.obtenerPorId(id));
-        return "reclamos/formulario";
+        model.addAttribute("clientes", clienteService.listarClientes());
+        return "reclamos/form";    // form.html
     }
 
+    // ACTUALIZAR ESTADO
     @PostMapping("/{id}/estado")
     public String actualizarEstado(
             @PathVariable Long id,
@@ -60,6 +67,7 @@ public class ReclamoController {
         return "redirect:/reclamos/" + id;
     }
 
+    // ELIMINAR
     @PostMapping("/{id}/eliminar")
     public String eliminar(@PathVariable Long id) {
         reclamoService.eliminarReclamo(id);

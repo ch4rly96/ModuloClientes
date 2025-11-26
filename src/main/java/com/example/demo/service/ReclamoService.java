@@ -9,6 +9,8 @@ public interface ReclamoService {
 
     Reclamo obtenerPorId(Long id);
 
+    Reclamo actualizarReclamo(Reclamo reclamo);
+
     List<Reclamo> listarTodos();
 
     List<Reclamo> listarPorCliente(Long idCliente);

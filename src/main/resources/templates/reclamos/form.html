@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Reclamo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="p-4">
+
+<h2 id="tituloForm">Nuevo Reclamo</h2>
+
+<form class="card p-4 shadow" id="formReclamo">
+    <input type="hidden" id="idReclamo">
+
+    <div class="mb-3">
+        <label class="form-label">Cliente *</label>
+        <select id="idCliente" class="form-select" required>
+            <option value="">Seleccionar cliente...</option>
+        </select>
+        <small class="form-text text-muted">Busca clientes en el sistema</small>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Motivo *</label>
+        <input type="text" id="motivo" class="form-control" required maxlength="100"
+               placeholder="Ej: Producto defectuoso, Retraso en entrega...">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Descripción detallada *</label>
+        <textarea id="descripcion" class="form-control" rows="4" required maxlength="1000"
+                  placeholder="Describe el problema o situación..."></textarea>
+    </div>
+
+    <div id="estadoContainer" class="mb-3" style="display: none;">
+        <label class="form-label">Estado</label>
+        <select id="estado" class="form-select">
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="EN_PROCESO">EN PROCESO</option>
+            <option value="RESUELTO">RESUELTO</option>
+            <option value="CERRADO">CERRADO</option>
+        </select>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Guardar Reclamo</button>
+        <a href="/reclamos" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+<script>
+    // Cargar clientes para el select
+    fetch('/api/clientes')
+        .then(response => {
+            if (!response.ok) throw new Error('Error al cargar clientes');
+            return response.json();
+        })
+        .then(clientes => {
+            const select = document.getElementById('idCliente');
+            select.innerHTML = '<option value="">Seleccionar cliente...</option>';
+
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.idCliente || cliente.id;
+
+                let texto = '';
+                if (cliente.nombres && cliente.apellidos) {
+                    texto = `${cliente.nombres} ${cliente.apellidos}`;
+                } else if (cliente.razonSocial) {
+                    texto = cliente.razonSocial;
+                } else {
+                    texto = `Cliente ${cliente.idCliente || cliente.id}`;
+                }
+
+                if (cliente.documentoIdentidad) {
+                    texto += ` - ${cliente.documentoIdentidad}`;
+                }
+
+                option.textContent = texto;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error cargando clientes:', error);
+            document.getElementById('idCliente').innerHTML =
+                '<option value="">Error al cargar clientes</option>';
+        });
+
+    // Manejar envío del formulario
+    document.getElementById('formReclamo').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const reclamoData = {
+            cliente: {
+                idCliente: parseInt(document.getElementById('idCliente').value)
+            },
+            motivo: document.getElementById('motivo').value,
+            descripcion: document.getElementById('descripcion').value
+        };
+
+        // Solo incluir estado si estamos editando
+        const idReclamo = document.getElementById('idReclamo').value;
+        if (idReclamo) {
+            reclamoData.estado = document.getElementById('estado').value;
+        }
+
+        const url = idReclamo ? `/api/reclamos/${idReclamo}` : '/api/reclamos?usuarioNombre=Admin';
+        const method = idReclamo ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(reclamoData)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                return response.json();
+            })
+            .then(data => {
+                window.location.href = '/reclamos';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al guardar el reclamo: ' + error.message);
+            });
+    });
+
+    // Si es edición, cargar datos
+    const pathParts = window.location.pathname.split('/');
+    if (pathParts.includes('editar')) {
+        const id = pathParts[2];
+        document.getElementById('tituloForm').textContent = 'Editar Reclamo';
+        document.getElementById('idReclamo').value = id;
+        document.getElementById('estadoContainer').style.display = 'block';
+
+        fetch(`/api/reclamos/${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Error al cargar reclamo');
+                return response.json();
+            })
+            .then(reclamo => {
+                document.getElementById('idCliente').value = reclamo.cliente.idCliente || reclamo.cliente.id;
+                document.getElementById('motivo').value = reclamo.motivo || '';
+                document.getElementById('descripcion').value = reclamo.descripcion || '';
+                document.getElementById('estado').value = reclamo.estado || 'PENDIENTE';
+            })
+            .catch(error => {
+                console.error('Error cargando reclamo:', error);
+                alert('Error al cargar el reclamo para editar');
+            });
+    }
+</script>
+
+</body>
+</html>

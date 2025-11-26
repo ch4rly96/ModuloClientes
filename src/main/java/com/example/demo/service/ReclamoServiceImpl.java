@@ -89,4 +89,8 @@ public class ReclamoServiceImpl implements ReclamoService  {
         }
         reclamoRepository.deleteById(id);
     }
+    @Override
+    public Reclamo actualizarReclamo(Reclamo reclamo) {
+        return reclamoRepository.save(reclamo);
+    }
 }

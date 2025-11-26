@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle Reclamo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="p-4">
+
+<h2>Detalle del Reclamo</h2>
+
+<div class="card p-4 shadow mt-3" id="detalles"></div>
+
+<script>
+    const id = location.pathname.split("/")[2];
+
+    fetch(`/api/reclamos/${id}`)
+        .then(r => r.json())
+        .then(rc => {
+            document.getElementById("detalles").innerHTML = `
+                <p><strong>ID:</strong> ${rc.id}</p>
+                <p><strong>Cliente:</strong> ${rc.clienteNombre}</p>
+                <p><strong>Descripción:</strong> ${rc.descripcion}</p>
+                <p><strong>Estado:</strong> ${rc.estado}</p>
+
+                <h4 class="mt-4">Actualizar Estado</h4>
+
+                <select id="estado" class="form-select mb-3">
+                    <option ${rc.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
+                    <option ${rc.estado === "En Proceso" ? "selected" : ""}>En Proceso</option>
+                    <option ${rc.estado === "Resuelto" ? "selected" : ""}>Resuelto</option>
+                </select>
+
+                <textarea id="solucion" class="form-control mb-3" rows="3" placeholder="Solución"></textarea>
+
+                <button class="btn btn-primary" onclick="actualizarEstado()">Actualizar</button>
+                <a href="/reclamos" class="btn btn-secondary ms-2">Volver</a>
+            `;
+        });
+
+    function actualizarEstado() {
+        fetch(`/api/reclamos/${id}/estado`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                estado: document.getElementById("estado").value,
+                solucion: document.getElementById("solucion").value,
+                usuarioNombre: "Admin"
+            })
+        }).then(() => location.reload());
+    }
+</script>
+
+</body>
+</html>
