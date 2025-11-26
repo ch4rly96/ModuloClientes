@@ -30,11 +30,12 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Subtipo</label>
                                 <select class="form-select" th:field="*{subtipoCliente}" required>
-                                    <option value="natural" th:disabled="${cliente.tipoCliente == 'empresa'}">Natural</option>
-                                    <option value="juridico" th:disabled="${cliente.tipoCliente == 'persona'}">Jurídico</option>
-                                    <option value="constructor" th:disabled="${cliente.tipoCliente == 'persona'}">Constructor</option>
-                                    <option value="corporativo" th:disabled="${cliente.tipoCliente == 'persona'}">Corporativo</option>
+                                    <option value="natural" th:disabled="${cliente.tipoCliente == 'empresa'}" th:selected="${cliente.subtipoCliente == 'natural'}">Natural</option>
+                                    <option value="juridico" th:disabled="${cliente.tipoCliente == 'persona'}" th:selected="${cliente.subtipoCliente == 'juridico'}">Jurídico</option>
+                                    <option value="constructor" th:disabled="${cliente.tipoCliente == 'persona'}" th:selected="${cliente.subtipoCliente == 'constructor'}">Constructor</option>
+                                    <option value="corporativo" th:disabled="${cliente.tipoCliente == 'persona'}" th:selected="${cliente.subtipoCliente == 'corporativo'}">Corporativo</option>
                                 </select>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('subtipoCliente')}" th:errors="*{subtipoCliente}"></div>
                             </div>
                         </div>
 
@@ -93,6 +94,14 @@
                             <textarea class="form-control" th:field="*{direccionPrincipal}" rows="2"></textarea>
                         </div>
 
+                        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Por favor corrige los siguientes errores:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
                         <div class="text-end">
                             <a th:href="@{/clientes}" class="btn btn-secondary">Cancelar</a>
                             <button type="submit" class="btn btn-primary btn-lg">
@@ -100,6 +109,7 @@
                                 <span th:text="${cliente.idCliente != null} ? 'Actualizar' : 'Guardar'"></span>
                             </button>
                         </div>
+
                     </form>
                 </div>
             </div>

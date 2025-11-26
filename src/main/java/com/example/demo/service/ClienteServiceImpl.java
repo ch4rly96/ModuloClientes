@@ -12,50 +12,59 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ClienteServiceImpl implements ClienteService {
 
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // === GUARDAR CLIENTE CON VALIDACIÓN ===
     @Override
-    @Transactional
     public Cliente guardarCliente(Cliente cliente) {
         validarCliente(cliente);
         return clienteRepository.save(cliente);
     }
 
     private void validarCliente(Cliente cliente) {
+
         if (StringUtils.isBlank(cliente.getTipoCliente())) {
             throw new IllegalArgumentException("Debe seleccionar si es persona o empresa.");
         }
 
-        if ("persona".equalsIgnoreCase(cliente.getSubtipoCliente())) {
-            if (!"natural".equals(cliente.getTipoCliente())) {
-                throw new IllegalArgumentException("Una persona debe ser de tipo 'natural'.");
+        // === VALIDAR PERSONA ===
+        if ("persona".equalsIgnoreCase(cliente.getTipoCliente())) {
+
+            if (!"natural".equalsIgnoreCase(cliente.getSubtipoCliente())) {
+                throw new IllegalArgumentException("Una persona solo puede ser subtipo NATURAL.");
             }
-            if (StringUtils.isBlank(cliente.getNombres()) || StringUtils.isBlank(cliente.getApellidos())) {
+
+            if (StringUtils.isBlank(cliente.getNombres()) ||
+                    StringUtils.isBlank(cliente.getApellidos())) {
                 throw new IllegalArgumentException("Nombre y apellido son obligatorios para personas.");
             }
-        }
-        else if ("empresa".equalsIgnoreCase(cliente.getSubtipoCliente())) {
-            if (!List.of("juridico", "constructor", "corporativo").contains(cliente.getTipoCliente())) {
-                throw new IllegalArgumentException("Tipo de empresa inválido. Use: jurídico, constructor o corporativo.");
-            }
-            if (StringUtils.isBlank(cliente.getRazonSocial())) {
-                throw new IllegalArgumentException("La razón social es obligatoria para empresas.");
+
+            if (!List.of("DNI", "CE").contains(cliente.getTipoDocumento())) {
+                throw new IllegalArgumentException("Personas solo pueden tener DNI o CE.");
             }
         }
 
-        // Validar tipo de documento
-        if ("persona".equalsIgnoreCase(cliente.getTipoCliente()) &&
-                !List.of("DNI", "CE").contains(cliente.getTipoDocumento())) {
-            throw new IllegalArgumentException("Personas solo pueden tener DNI o CE.");
-        }
-        if ("empresa".equalsIgnoreCase(cliente.getTipoCliente()) && !"RUC".equals(cliente.getTipoDocumento())) {
-            throw new IllegalArgumentException("Empresas deben tener RUC.");
+        // === VALIDAR EMPRESA ===
+        if ("empresa".equalsIgnoreCase(cliente.getTipoCliente())) {
+
+            if (!List.of("juridico", "constructor", "corporativo")
+                    .contains(cliente.getSubtipoCliente())) {
+                throw new IllegalArgumentException("Subtipo inválido para empresa.");
+            }
+
+            if (StringUtils.isBlank(cliente.getRazonSocial())) {
+                throw new IllegalArgumentException("La razón social es obligatoria para empresas.");
+            }
+
+            if (!"RUC".equals(cliente.getTipoDocumento())) {
+                throw new IllegalArgumentException("Empresas deben tener RUC.");
+            }
         }
     }
+
 
     // === LISTADOS ===
     @Override

@@ -49,11 +49,15 @@ public class ClienteWebController {
         return "clientes/list";
     }
 
-    @GetMapping({"/nuevo", "/editar/{idCliente}"})
-    public String formulario(@PathVariable(required = false) Long idCliente, Model model) {
-        Cliente cliente = idCliente == null
-                ? new Cliente()
-                : clienteService.obtenerPorId(idCliente)
+    @GetMapping("/nuevo")
+    public String nuevo(Model model) {
+        model.addAttribute("cliente", new Cliente());
+        return "clientes/form";
+    }
+
+    @GetMapping("/editar/{idCliente}")
+    public String editar(@PathVariable Long idCliente, Model model) {
+        Cliente cliente = clienteService.obtenerPorId(idCliente)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         model.addAttribute("cliente", cliente);
@@ -61,36 +65,41 @@ public class ClienteWebController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Cliente cliente,
+    public String guardar(@Valid @ModelAttribute Cliente cliente,
                           BindingResult result,
                           RedirectAttributes flash,
                           Model model) {
+        System.out.println("=== DEBUG GUARDAR ===");
+        System.out.println("ID: " + cliente.getIdCliente());
+        System.out.println("Tipo: " + cliente.getTipoCliente());
+        System.out.println("Subtipo: " + cliente.getSubtipoCliente());
+        System.out.println("Razón Social: " + cliente.getRazonSocial());
+        System.out.println("Tiene errores: " + result.hasErrors());
 
         // === VALIDACIÓN PERSONALIZADA PARA TIPOCLIENTE ===
         if ("empresa".equals(cliente.getTipoCliente())) {
             if (cliente.getSubtipoCliente() == null || cliente.getSubtipoCliente().isBlank()) {
                 result.rejectValue("subtipoCliente", "", "Debe seleccionar el subtipo para empresa");
             }
-        }
-
-        // Si es persona, forzamos "natural" automáticamente (opcional, pero recomendado)
-        if ("persona".equals(cliente.getTipoCliente())) {
+        } else {
             cliente.setSubtipoCliente("natural");
         }
 
-        // === SI HAY ERRORES, VUELVE AL FORMULARIO ===
+        // === SI HAY ERRORES → VUELVE AL FORM ===
         if (result.hasErrors()) {
             model.addAttribute("cliente", cliente);
-            return "clientes/form";
+            System.out.println("HAY ERRORES → VOLVIENDO AL FORM");
+            return "clientes/form";  // Aquí se queda con el cliente y los errores
         }
 
         // === GUARDAR ===
         try {
-            clienteService.guardarCliente(cliente);
-            flash.addFlashAttribute("success",
-                    cliente.getIdCliente() != null ? "Cliente actualizado con éxito" : "Cliente creado con éxito");
+            Cliente guardado = clienteService.guardarCliente(cliente);
+            System.out.println("GUARDADO CON ID: " + guardado.getIdCliente());
+            flash.addFlashAttribute("success", "Cliente actualizado con éxito");
         } catch (Exception e) {
             model.addAttribute("error", "Error al guardar: " + e.getMessage());
+            model.addAttribute("cliente", cliente);  // también aquí por si acaso
             return "clientes/form";
         }
 

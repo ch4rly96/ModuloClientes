@@ -38,6 +38,8 @@ public class SecurityConfig {
                         // 1. PRIMERO: RUTAS WEB PÚBLICAS
                         .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
 
+                        .requestMatchers("/dashboard/content", "/fragments/**", "/api/user/name").permitAll()
+
                         // 2. SEGUNDO: RUTAS WEB PROTEGIDAS (solo usuarios autenticados con sesión)
                         .requestMatchers("/home", "/home/**", "/clientes", "/clientes/**", "/reclamos", "/reclamos/**", "/reportes", "/reportes/**")
                         .authenticated()
