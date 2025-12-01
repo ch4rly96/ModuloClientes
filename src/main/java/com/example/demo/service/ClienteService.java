@@ -12,7 +12,7 @@ public interface ClienteService {
     List<Cliente> listarClientes();
     Optional<Cliente> obtenerPorId(Long id);
     Cliente obtenerPorDocumento(String documentoIdentidad);
-    void eliminarCliente(Long id);
+    void eliminar(Long id);
     void cambiarEstado(Long id, boolean estado);
 
     // === FILTROS ERP ===

@@ -106,6 +106,40 @@ public class ClienteWebController {
         return "redirect:/clientes";
     }
 
+    @PostMapping("/actualizar/{idCliente}")
+    public String actualizar(
+            @PathVariable Long idCliente,
+            @Valid @ModelAttribute("cliente") Cliente cliente,
+            BindingResult result,
+            RedirectAttributes flash,
+            Model model) {
+
+        if (result.hasErrors()) {
+            model.addAttribute("cliente", cliente);
+            return "clientes/form";
+        }
+
+        Cliente existente = clienteService.obtenerPorId(idCliente)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // copiar campos
+        existente.setNombres(cliente.getNombres());
+        existente.setApellidos(cliente.getApellidos());
+        existente.setDireccionPrincipal(cliente.getDireccionPrincipal());
+        existente.setDocumentoIdentidad(cliente.getDocumentoIdentidad());
+        existente.setEmail(cliente.getEmail());
+        existente.setTelefono(cliente.getTelefono());
+        existente.setTipoCliente(cliente.getTipoCliente());
+        existente.setSubtipoCliente(cliente.getSubtipoCliente());
+        existente.setRazonSocial(cliente.getRazonSocial());
+        existente.setEstado(cliente.getEstado());
+
+        clienteService.guardarCliente(existente);
+        flash.addFlashAttribute("success", "Cliente actualizado correctamente");
+        return "redirect:/clientes";
+    }
+
+
     @GetMapping("/estado/{idCliente}")
     public String cambiarEstado(@PathVariable Long idCliente, RedirectAttributes flash) {
         Cliente c = clienteService.obtenerPorId(idCliente).orElseThrow();
@@ -119,5 +153,14 @@ public class ClienteWebController {
         Cliente cliente = clienteService.obtenerPorId(idCliente).orElseThrow();
         model.addAttribute("cliente", cliente);
         return "clientes/view";
+    }
+
+    @GetMapping("/eliminar/{idCliente}")
+    public String eliminar(@PathVariable Long idCliente, RedirectAttributes flash) {
+
+        clienteService.eliminar(idCliente);
+        flash.addFlashAttribute("success", "Cliente eliminado correctamente");
+
+        return "redirect:/clientes";
     }
 }

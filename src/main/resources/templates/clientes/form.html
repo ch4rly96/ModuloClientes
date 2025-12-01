@@ -15,25 +15,30 @@
                     <h4 class="mb-0" th:text="${cliente.idCliente != null} ? 'Editar Cliente' : 'Nuevo Cliente'"></h4>
                 </div>
                 <div class="card-body">
-                    <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post">
+                    <form th:action="${cliente.idCliente} == null ? @{/clientes/guardar} :
+                     @{/clientes/actualizar/{idCliente}(idCliente=${cliente.idCliente})}"
+                     th:object="${cliente}" method="post">
                         <input type="hidden" th:field="*{idCliente}">
+                        <div th:if="${_csrf != null}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        </div>
 
                         <!-- TIPO DE CLIENTE -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">¿Es Persona o Empresa?</label>
                                 <select class="form-select" th:field="*{tipoCliente}" required onchange="toggleClienteForm()">
-                                    <option value="persona" th:selected="${cliente.tipoCliente == 'persona'}">Persona Natural</option>
-                                    <option value="empresa" th:selected="${cliente.tipoCliente == 'empresa'}">Empresa</option>
+                                    <option value="persona">Persona Natural</option>
+                                    <option value="empresa">Empresa</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Subtipo</label>
                                 <select class="form-select" th:field="*{subtipoCliente}" required>
-                                    <option value="natural" th:disabled="${cliente.tipoCliente == 'empresa'}" th:selected="${cliente.subtipoCliente == 'natural'}">Natural</option>
-                                    <option value="juridico" th:disabled="${cliente.tipoCliente == 'persona'}" th:selected="${cliente.subtipoCliente == 'juridico'}">Jurídico</option>
-                                    <option value="constructor" th:disabled="${cliente.tipoCliente == 'persona'}" th:selected="${cliente.subtipoCliente == 'constructor'}">Constructor</option>
-                                    <option value="corporativo" th:disabled="${cliente.tipoCliente == 'persona'}" th:selected="${cliente.subtipoCliente == 'corporativo'}">Corporativo</option>
+                                    <option value="natural" th:disabled="${cliente.tipoCliente == 'empresa'}">Natural</option>
+                                    <option value="juridico" th:disabled="${cliente.tipoCliente == 'persona'}">Jurídico</option>
+                                    <option value="constructor" th:disabled="${cliente.tipoCliente == 'persona'}">Constructor</option>
+                                    <option value="corporativo" th:disabled="${cliente.tipoCliente == 'persona'}">Corporativo</option>
                                 </select>
                                 <div class="text-danger small" th:if="${#fields.hasErrors('subtipoCliente')}" th:errors="*{subtipoCliente}"></div>
                             </div>

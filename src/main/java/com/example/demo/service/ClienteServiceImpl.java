@@ -117,7 +117,7 @@ public class ClienteServiceImpl implements ClienteService {
 
     // === ESTADO Y ELIMINACIÓN ===
     @Override
-    public void eliminarCliente(Long id) {
+    public void eliminar(Long id) {
         clienteRepository.deleteById(id);
     }
 

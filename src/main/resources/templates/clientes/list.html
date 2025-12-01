@@ -99,6 +99,11 @@
                                class="btn btn-sm" th:classappend="${c.estado} ? 'btn-secondary' : 'btn-success'">
                                 <i th:class="${c.estado} ? 'bi bi-x-circle' : 'bi bi-check-circle'"></i>
                             </a>
+                            <a th:href="@{/clientes/eliminar/{id}(id=${c.idCliente})}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('¿Seguro que deseas eliminar este cliente?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     </tbody>
