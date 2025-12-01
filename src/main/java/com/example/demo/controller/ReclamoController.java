@@ -1,76 +1,72 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Reclamo;
-import com.example.demo.service.ClienteService;
 import com.example.demo.service.ReclamoService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/reclamos")
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/reclamos")
 public class ReclamoController {
 
     private final ReclamoService reclamoService;
-    private final ClienteService clienteService;
 
-    public ReclamoController(ReclamoService reclamoService, ClienteService clienteService) {
+    public ReclamoController(ReclamoService reclamoService) {
         this.reclamoService = reclamoService;
-        this.clienteService = clienteService;
     }
 
-    // LISTA
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("reclamos", reclamoService.listarTodos());
-        return "reclamos/list";   // busca list.html
+    public List<Reclamo> listarTodos() {
+        return reclamoService.listarTodos();
     }
 
-    // NUEVO FORM
-    @GetMapping("/nuevo")
-    public String nuevoForm(Model model) {
-        model.addAttribute("reclamo", new Reclamo());
-        model.addAttribute("clientes", clienteService.listarClientes());
-        return "reclamos/form";    // form.html
-    }
-
-    // GUARDAR
-    @PostMapping
-    public String guardar(@ModelAttribute Reclamo reclamo, @RequestParam String usuarioNombre) {
-        reclamoService.crearReclamo(reclamo, usuarioNombre);
-        return "redirect:/reclamos";
-    }
-
-    // DETALLE
     @GetMapping("/{id}")
-    public String ver(@PathVariable Long id, Model model) {
-        model.addAttribute("reclamo", reclamoService.obtenerPorId(id));
-        return "reclamos/view";    // view.html
+    public Reclamo obtenerPorId(@PathVariable Long id) {
+        return reclamoService.obtenerPorId(id);
     }
 
-    // EDITAR FORM
-    @GetMapping("/{id}/editar")
-    public String editarForm(@PathVariable Long id, Model model) {
-        model.addAttribute("reclamo", reclamoService.obtenerPorId(id));
-        model.addAttribute("clientes", clienteService.listarClientes());
-        return "reclamos/form";    // form.html
+    @PostMapping
+    public Reclamo crear(@RequestBody Reclamo reclamo, @RequestParam String usuarioNombre) {
+        return reclamoService.crearReclamo(reclamo, usuarioNombre);
     }
 
-    // ACTUALIZAR ESTADO
+    // AGREGAR ESTE MÉTODO PARA EDITAR RECLAMOS
+    @PutMapping("/{id}")
+    public Reclamo actualizarReclamo(@PathVariable Long id, @RequestBody Reclamo reclamoActualizado) {
+        Reclamo reclamoExistente = reclamoService.obtenerPorId(id);
+
+        // Actualizar campos permitidos
+        reclamoExistente.setCliente(reclamoActualizado.getCliente());
+        reclamoExistente.setMotivo(reclamoActualizado.getMotivo());
+        reclamoExistente.setDescripcion(reclamoActualizado.getDescripcion());
+
+        // Solo permitir cambiar estado si se proporciona
+        if (reclamoActualizado.getEstado() != null) {
+            reclamoExistente.setEstado(reclamoActualizado.getEstado());
+        }
+
+        // Guardar cambios
+        return reclamoService.actualizarReclamo(reclamoExistente);
+    }
+
     @PostMapping("/{id}/estado")
-    public String actualizarEstado(
-            @PathVariable Long id,
-            @RequestParam String estado,
-            @RequestParam String solucion,
-            @RequestParam String usuarioNombre) {
-        reclamoService.actualizarEstado(id, estado, solucion, usuarioNombre);
-        return "redirect:/reclamos/" + id;
+    public Reclamo actualizarEstado(@PathVariable Long id, @RequestBody ActualizarEstadoRequest request) {
+        return reclamoService.actualizarEstado(id, request.getEstado(), request.getSolucion(), request.getUsuarioNombre());
     }
 
-    // ELIMINAR
-    @PostMapping("/{id}/eliminar")
-    public String eliminar(@PathVariable Long id) {
-        reclamoService.eliminarReclamo(id);
-        return "redirect:/reclamos";
+    // Clase auxiliar para el request
+    public static class ActualizarEstadoRequest {
+        private String estado;
+        private String solucion;
+        private String usuarioNombre;
+
+        // getters y setters
+        public String getEstado() { return estado; }
+        public void setEstado(String estado) { this.estado = estado; }
+        public String getSolucion() { return solucion; }
+        public void setSolucion(String solucion) { this.solucion = solucion; }
+        public String getUsuarioNombre() { return usuarioNombre; }
+        public void setUsuarioNombre(String usuarioNombre) { this.usuarioNombre = usuarioNombre; }
     }
 }

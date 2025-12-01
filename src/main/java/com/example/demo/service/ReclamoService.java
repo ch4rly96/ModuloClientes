@@ -19,6 +19,8 @@ public interface ReclamoService {
 
     List<Reclamo> buscarPorNumero(String numero);
 
+    List<Reclamo> buscar(String q, String estado);
+
     Reclamo actualizarEstado(Long id, String nuevoEstado, String solucion, String usuarioNombre);
 
     void eliminarReclamo(Long id);

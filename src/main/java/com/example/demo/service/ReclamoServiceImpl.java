@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Cliente;
 import com.example.demo.model.Reclamo;
 import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.ReclamoRepository;
@@ -64,7 +63,34 @@ public class ReclamoServiceImpl implements ReclamoService  {
 
     @Override public Reclamo obtenerPorId(Long id) {
         return reclamoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reclamo no encontrado."));
+                .orElseThrow(() -> new RuntimeException("Reclamo no encontrado con id: " + id));
+    }
+
+    public static String quitarTildes(String texto) {
+        if (texto == null) return null;
+        return java.text.Normalizer.normalize(texto, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+
+    @Override
+    public List<Reclamo> buscar(String q, String estado) {
+        if (q != null) {
+            q = quitarTildes(q).toLowerCase();
+        }
+
+        if ((q == null || q.isEmpty()) && (estado == null || estado.equals("todos"))) {
+            return reclamoRepository.findAllByOrderByFechaReclamoDesc();
+        }
+
+        if (estado == null || estado.equals("todos")) {
+            return reclamoRepository.buscarPorCliente(q);
+        }
+
+        if (q == null || q.isEmpty()) {
+            return reclamoRepository.findByEstadoOrderByFechaReclamoDesc(estado);
+        }
+
+        return reclamoRepository.buscarPorClienteYEstado(q, estado);
     }
 
     @Override public List<Reclamo> listarTodos() {
