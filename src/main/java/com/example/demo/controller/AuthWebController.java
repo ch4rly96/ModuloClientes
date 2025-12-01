@@ -7,12 +7,17 @@ import com.example.demo.dto.RegisterRequest;
 import com.example.demo.service.AuthService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -45,9 +50,25 @@ public class AuthWebController {
 
         try {
             AuthResponse response = authService.login(request);
+
+            // GUARDAR TOKEN EN SESIÓN
             session.setAttribute("token", response.token());
             session.setAttribute("nombreUsuario", response.nombre());
             session.setAttribute("roles", response.roles());
+
+            // LOGIN REAL EN SPRING SECURITY
+            List<GrantedAuthority> auths = response.roles().stream()
+                    .map(role -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + role))
+                    .toList();
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            request.username(),
+                            null,
+                            auths
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
 
             flash.addFlashAttribute("success", "¡Bienvenido, " + response.nombre() + "!");
             return "redirect:/home";
@@ -60,7 +81,7 @@ public class AuthWebController {
 
     @GetMapping("/logout")
     public String logout(HttpSession session, RedirectAttributes flash) {
-        session.invalidate();  // Borra token, nombre, roles
+        session.invalidate();
         flash.addFlashAttribute("success", "¡Sesión cerrada correctamente!");
         return "redirect:/auth/login";
     }

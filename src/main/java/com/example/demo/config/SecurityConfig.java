@@ -21,51 +21,48 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
+                .logout(logout -> logout.disable())
 
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/auth/login")
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
-                )
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+
                 .authorizeHttpRequests(auth -> auth
+                        // Recursos públicos
+                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
 
-                        // 1. PRIMERO: RUTAS WEB PÚBLICAS
-                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                        // Plantillas thymeleaf
+                        .requestMatchers("/layout/**", "/fragments/**").permitAll()
 
-                        .requestMatchers("/dashboard/content", "/fragments/**", "/api/user/name").permitAll()
-
-                        // 2. SEGUNDO: RUTAS WEB PROTEGIDAS (solo usuarios autenticados con sesión)
-                        .requestMatchers("/home", "/home/**", "/clientes", "/clientes/**", "/reclamos", "/reclamos/**", "/reportes", "/reportes/**")
-                        .authenticated()
-
-                        // 3. TERCERO: API AUTH (permitido para todos)
+                        // API pública
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // 4. CUARTO: API CLIENTES POR MÉTODO (con roles)
+                        // Vistas web (requieren sesión)
+                        .requestMatchers("/home/**", "/clientes/**", "/reclamos/**", "/reportes/**")
+                        .authenticated()
+
+                        // API protegida con roles
                         .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyRole("ADMIN", "VENDEDOR")
                         .requestMatchers(HttpMethod.POST, "/api/clientes/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/clientes/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/clientes/**").hasRole("ADMIN")
 
-                        // 5. OTROS ENDPOINTS API
-                        .requestMatchers("/reclamos/**").hasAnyRole("ADMIN", "CAJERO", "SUPERVISOR")
-
-                        // 6. ÚLTIMO: TODO LO DEMÁS
                         .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
+
+
