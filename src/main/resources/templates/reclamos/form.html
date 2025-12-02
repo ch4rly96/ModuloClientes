@@ -15,9 +15,9 @@
             </div>
 
             <div class="card-body">
-                <form th:action="@{/reclamos}" th:object="${reclamo}" method="post">
+                <form th:action="@{/reclamos/{id}(id=${reclamo.idReclamo})}" th:object="${reclamo}" method="post">
 
-                    <input type="hidden" th:field="*{idReclamo}">
+                <input type="hidden" th:field="*{idReclamo}">
 
                     <!-- Cliente -->
                     <div class="mb-3">
@@ -46,16 +46,10 @@
                     <!-- ESTADO SOLO PARA NUEVO -->
                     <input type="hidden" name="estado" value="PENDIENTE">
 
-                    <!-- Estado (solo editar) -->
+                    <!-- Mostrar Estado Actual -->
                     <div class="mb-3" th:if="${reclamo.idReclamo != null}">
-                        <label class="fw-bold">Estado</label>
-                        <select th:field="*{estado}" class="form-select">
-                            <option value="PENDIENTE">PENDIENTE</option>
-                            <option value="EN_PROCESO">EN PROCESO</option>
-                            <option value="RESUELTO">RESUELTO</option>
-                            <option value="CERRADO">CERRADO</option>
-                            <option value="RECHAZADO">RECHAZADO</option>
-                        </select>
+                        <label class="fw-bold">Estado Actual</label>
+                        <span class="form-control" th:text="${reclamo.estado}" readonly></span>
                     </div>
 
                     <!-- Usuario -->

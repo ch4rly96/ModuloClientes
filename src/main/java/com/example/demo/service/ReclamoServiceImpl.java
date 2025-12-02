@@ -40,11 +40,19 @@ public class ReclamoServiceImpl implements ReclamoService  {
         return reclamoRepository.save(reclamo);
     }
 
+    @Override
+    public Reclamo actualizarReclamo(Reclamo reclamo) {
+        Reclamo reclamoOriginal = reclamoRepository.findById(reclamo.getIdReclamo()).orElseThrow(() -> new RuntimeException("Reclamo no encontrado"));
+        reclamo.setNumeroReclamo(reclamoOriginal.getNumeroReclamo());
+        return reclamoRepository.save(reclamo);
+    }
+
     private String generarNumeroReclamo() {
         Reclamo ultimo = reclamoRepository.findTopByOrderByIdReclamoDesc();
         int siguiente = (ultimo != null && ultimo.getIdReclamo() != null) ? ultimo.getIdReclamo().intValue() + 1 : 1;
         return "REC-" + LocalDateTime.now().getYear() + "-" + String.format("%04d", siguiente);
     }
+
 
     private void validarReclamo(Reclamo reclamo) {
         if (reclamo.getCliente() == null || reclamo.getCliente().getIdCliente() == null) {
@@ -114,9 +122,5 @@ public class ReclamoServiceImpl implements ReclamoService  {
             throw new IllegalArgumentException("Reclamo no existe.");
         }
         reclamoRepository.deleteById(id);
-    }
-    @Override
-    public Reclamo actualizarReclamo(Reclamo reclamo) {
-        return reclamoRepository.save(reclamo);
     }
 }

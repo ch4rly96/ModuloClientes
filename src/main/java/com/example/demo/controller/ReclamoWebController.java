@@ -54,6 +54,20 @@ public class ReclamoWebController {
         return "redirect:/reclamos";
     }
 
+    // ACTUALIZAR RECLAMO
+    @PostMapping("/{id}")
+    public String actualizarReclamo(
+            @PathVariable Long id,
+            @ModelAttribute Reclamo reclamo,
+            @RequestParam String usuarioNombre) {
+        System.out.println("Estado recibido: " + reclamo.getEstado());
+        // Mantener el mismo numero_reclamo que tenía originalmente
+        reclamo.setNumeroReclamo(reclamoService.obtenerPorId(id).getNumeroReclamo());
+        reclamoService.actualizarReclamo(reclamo);
+        return "redirect:/reclamos/" + id;
+    }
+
+
     // DETALLE
     @GetMapping("/{id}")
     public String ver(@PathVariable Long id, Model model) {

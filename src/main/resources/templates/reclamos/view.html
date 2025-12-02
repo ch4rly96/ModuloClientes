@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Detalle del Reclamo</title>
@@ -38,7 +38,13 @@
             <p><strong>Motivo:</strong> <span th:text="${reclamo.motivo}"></span></p>
             <p><strong>Descripción:</strong> <span th:text="${reclamo.descripcion}"></span></p>
 
+            <!-- Mostrar Estado Actual -->
             <p><strong>Estado actual:</strong>
+            <div class="mb-3" th:if="${reclamo.idReclamo != null}">
+                <span class="form-control" th:text="${reclamo.estado}" readonly></span>
+            </div>
+            </p>
+            <!--  <p><strong>Estado actual:</strong>
                 <span th:classappend="
                     ${reclamo.estado == 'PENDIENTE'    ? ' bg-warning text-dark' :
                      reclamo.estado == 'EN_PROCESO'   ? ' bg-info' :
@@ -46,7 +52,7 @@
                      reclamo.estado == 'CERRADO'      ? ' bg-secondary' :
                                                         ' bg-danger'}">
                 </span>
-            </p>
+            </p> -->
 
             <p><strong>Fecha registro:</strong>
                 <span th:text="${#temporals.format(reclamo.fechaReclamo,'dd/MM/yyyy HH:mm')}"></span>
