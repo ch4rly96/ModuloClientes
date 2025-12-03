@@ -125,7 +125,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function confirmarGuardar() {
-        // Crear modal de confirmación personalizado
+        // Detectar si es edición (idCliente tiene valor) o creación
+        const idInput = document.querySelector('input[name="idCliente"]');
+        const isEdit = idInput && idInput.value && idInput.value.trim() !== '';
+        const mensaje = isEdit ? '¿Seguro de actualizar este cliente?' : '¿Seguro de guardar nuevo cliente?';
+
+        // Crear modal de confirmación personalizado con mensaje dinámico
         const modal = document.createElement('div');
         modal.className = 'modal fade';
         modal.id = 'confirmarGuardarModal';
@@ -138,11 +143,11 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="fs-6">¿Seguro de guardar nuevo cliente?</p>
+                        <p class="fs-6">${mensaje}</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                        <button type="button" class="btn btn-primary" onclick="enviarFormulario()">Aceptar</button>
+                        <button type="button" class="btn btn-primary" id="confirmAceptar">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -152,6 +157,13 @@
         const bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
 
+        // Acciones para botones
+        modal.querySelector('#confirmAceptar').addEventListener('click', function() {
+            // Enviar formulario y ocultar modal
+            enviarFormulario();
+            bootstrapModal.hide();
+        });
+
         // Limpiar el modal cuando se cierre
         modal.addEventListener('hidden.bs.modal', function() {
             modal.remove();
@@ -159,7 +171,8 @@
     }
 
     function enviarFormulario() {
-        document.querySelector('form').submit();
+        const form = document.querySelector('form');
+        if (form) form.submit();
     }
 </script>
 </body>

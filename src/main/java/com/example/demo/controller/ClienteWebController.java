@@ -134,7 +134,6 @@ public class ClienteWebController {
         existente.setEstado(cliente.getEstado());
 
         clienteService.guardarCliente(existente);
-        flash.addFlashAttribute("success", "Cliente actualizado correctamente");
         return "redirect:/clientes";
     }
 
