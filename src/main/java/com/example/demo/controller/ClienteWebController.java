@@ -100,7 +100,6 @@ public class ClienteWebController {
         try {
             Cliente guardado = clienteService.guardarCliente(cliente);
             System.out.println("GUARDADO CON ID: " + guardado.getIdCliente());
-            flash.addFlashAttribute("success", "Cliente actualizado con éxito");
         } catch (Exception e) {
             model.addAttribute("error", "Error al guardar: " + e.getMessage());
             model.addAttribute("cliente", cliente);  // también aquí por si acaso
@@ -139,7 +138,6 @@ public class ClienteWebController {
         existente.setEstado(cliente.getEstado());
 
         clienteService.guardarCliente(existente);
-        flash.addFlashAttribute("success", "Cliente actualizado correctamente");
         return "redirect:/clientes";
     }
 
