@@ -42,6 +42,7 @@ public class ReclamoWebController {
     public String nuevoForm(Model model) {
         Reclamo r = new Reclamo();
         r.setCliente(new Cliente());
+        r.setNumeroReclamo(reclamoService.generarNumeroReclamo());
         model.addAttribute("reclamo", r);
         model.addAttribute("clientes", clienteService.listarClientes());
         return "reclamos/form";    // form.html
@@ -60,8 +61,6 @@ public class ReclamoWebController {
             @PathVariable Long id,
             @ModelAttribute Reclamo reclamo,
             @RequestParam String usuarioNombre) {
-        System.out.println("Estado recibido: " + reclamo.getEstado());
-        // Mantener el mismo numero_reclamo que tenía originalmente
         reclamo.setNumeroReclamo(reclamoService.obtenerPorId(id).getNumeroReclamo());
         reclamoService.actualizarReclamo(reclamo);
         return "redirect:/reclamos/" + id;

@@ -47,7 +47,7 @@ public class ReclamoServiceImpl implements ReclamoService  {
         return reclamoRepository.save(reclamo);
     }
 
-    private String generarNumeroReclamo() {
+    public String generarNumeroReclamo() {
         Reclamo ultimo = reclamoRepository.findTopByOrderByIdReclamoDesc();
         int siguiente = (ultimo != null && ultimo.getIdReclamo() != null) ? ultimo.getIdReclamo().intValue() + 1 : 1;
         return "REC-" + LocalDateTime.now().getYear() + "-" + String.format("%04d", siguiente);

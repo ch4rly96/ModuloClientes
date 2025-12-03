@@ -38,8 +38,21 @@
                     <span th:if="${!cliente.estado}" class="badge bg-secondary fs-5">INACTIVO</span>
                 </div>
             </div>
+
+            <!-- Botones para Agregar y Ver Direcciones -->
+            <div class="d-flex justify-content-start mt-4">
+                <!-- Botón para Agregar Dirección -->
+                <a th:href="@{/clientes/{idCliente}/direcciones/agregar(idCliente=${cliente.idCliente})}" class="btn btn-success btn-sm">
+                    Agregar Dirección
+                </a>
+
+                <!-- Botón para Ver Direcciones -->
+                <a th:href="@{/clientes/{idCliente}/direcciones/ver(idCliente=${cliente.idCliente})}" class="btn btn-info btn-sm ms-2">
+                    Ver Direcciones
+                </a>
+            </div>
         </div>
-        <div class="card-footer text-center">
+        <div class="card-footer text-end">
             <a th:href="@{/clientes/editar/{id}(id=${cliente.idCliente})}" class="btn btn-warning">
                 Editar
             </a>

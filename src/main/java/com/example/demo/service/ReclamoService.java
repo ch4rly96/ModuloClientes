@@ -11,6 +11,8 @@ public interface ReclamoService {
 
     Reclamo actualizarReclamo(Reclamo reclamo);
 
+    String generarNumeroReclamo();
+
     List<Reclamo> listarTodos();
 
     List<Reclamo> listarPorCliente(Long idCliente);

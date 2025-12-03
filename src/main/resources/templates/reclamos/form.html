@@ -15,8 +15,8 @@
             </div>
 
             <div class="card-body">
-                <form th:action="@{/reclamos/{id}(id=${reclamo.idReclamo})}" th:object="${reclamo}" method="post">
-
+                <form th:action="${reclamo.idReclamo != null} ? @{/reclamos/{id}(id=${reclamo.idReclamo})} :
+                 @{/reclamos}" th:object="${reclamo}" method="post">
                 <input type="hidden" th:field="*{idReclamo}">
 
                     <!-- Cliente -->
