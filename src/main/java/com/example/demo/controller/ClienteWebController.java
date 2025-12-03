@@ -154,10 +154,29 @@ public class ClienteWebController {
     public String detalle(@PathVariable Long idCliente, Model model) {
         Cliente cliente = clienteService.obtenerPorId(idCliente).orElseThrow();
         model.addAttribute("cliente", cliente);
-        //model.addAttribute("direcciones", direccionesService.listarPorCliente(idCliente));  // Agregar direcciones
-        //model.addAttribute("tienePrincipal", direccionesService.obtenerPrincipal(idCliente).isPresent()); // Verifica si tiene dirección principal
-        //model.addAttribute("nuevaDireccion", new Direcciones()); // Para el formulario de nueva dirección
+        model.addAttribute("direcciones", direccionesService.listarPorCliente(idCliente));
+        model.addAttribute("mostrarDirecciones", false);
         return "clientes/view";
+    }
+
+    @GetMapping("/{idCliente}/direcciones/agregar")
+    public String agregarDireccion(@PathVariable Long idCliente, Model model) {
+        Cliente cliente = clienteService.obtenerPorId(idCliente)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
+        model.addAttribute("cliente", clienteService.obtenerPorId(idCliente).orElseThrow());
+        model.addAttribute("nuevaDireccion", new Direcciones());
+        return "clientes/agregarDireccion";
+    }
+
+    @GetMapping("/{idCliente}/direcciones/ver")
+    public String verDirecciones(@PathVariable Long idCliente, Model model) {
+        Cliente cliente = clienteService.obtenerPorId(idCliente).orElseThrow(() ->
+                new IllegalArgumentException("Cliente no encontrado"));
+        // Agrega el cliente al modelo
+        model.addAttribute("cliente", cliente);// Obtiene las direcciones del cliente
+        List<Direcciones> direcciones = direccionesService.listarPorCliente(idCliente);
+        model.addAttribute("direcciones", direcciones);
+        return "clientes/verDirecciones";
     }
 
 

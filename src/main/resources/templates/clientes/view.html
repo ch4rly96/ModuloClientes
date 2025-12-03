@@ -39,25 +39,67 @@
                 </div>
             </div>
 
-            <!-- Botones para Agregar y Ver Direcciones -->
-            <div class="d-flex justify-content-start mt-4">
-                <!-- Botón para Agregar Dirección -->
-                <a th:href="@{/clientes/{idCliente}/direcciones/agregar(idCliente=${cliente.idCliente})}" class="btn btn-success btn-sm">
-                    Agregar Dirección
-                </a>
-
-                <!-- Botón para Ver Direcciones -->
-                <a th:href="@{/clientes/{idCliente}/direcciones/ver(idCliente=${cliente.idCliente})}" class="btn btn-info btn-sm ms-2">
-                    Ver Direcciones
+            <div class="card-footer text-end">
+                <a th:href="@{/clientes/editar/{id}(id=${cliente.idCliente})}" class="btn btn-warning">
+                    Editar
                 </a>
             </div>
         </div>
-        <div class="card-footer text-end">
-            <a th:href="@{/clientes/editar/{id}(id=${cliente.idCliente})}" class="btn btn-warning">
-                Editar
+
+        <div class="card-footer">
+            <!-- Botón para Agregar Dirección -->
+            <a th:href="@{/clientes/{idCliente}/direcciones/agregar(idCliente=${cliente.idCliente})}" class="btn btn-success btn-sm">
+                Agregar Dirección
             </a>
+        </div>
+
+        <!-- Modal de direcciones -->
+        <div class="modal fade" id="modalDirecciones" tabindex="-1" aria-labelledby="modalDireccionesLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDireccionesLabel">Direcciones Registradas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Tipo de Dirección</th>
+                                <th>Dirección</th>
+                                <th>Ciudad</th>
+                                <th>Departamento</th>
+                                <th>País</th>
+                                <th>Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="direccion : ${direcciones}">
+                                <td th:text="${direccion.tipoDireccion}"></td>
+                                <td th:text="${direccion.direccion}"></td>
+                                <td th:text="${direccion.ciudad}"></td>
+                                <td th:text="${direccion.departamento}"></td>
+                                <td th:text="${direccion.pais}"></td>
+                                <td>
+                                    <form th:action="@{/clientes/{idCliente}/direcciones/{idDireccion}/eliminar(idCliente=${cliente.idCliente}, idDireccion=${direccion.idDireccion})}" method="post">
+                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón para abrir el modal -->
+        <div class="card-footer">
+            <a href="javascript:void(0);" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modalDirecciones">Ver Direcciones</a>
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
