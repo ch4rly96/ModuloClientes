@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClienteService {
-
     // === CRUD BÁSICO ===
     Cliente guardarCliente(Cliente cliente);
     List<Cliente> listarClientes();
