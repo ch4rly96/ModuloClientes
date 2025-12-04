@@ -2,74 +2,176 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${reclamo.idReclamo != null} ? 'Editar Reclamo' : 'Nuevo Reclamo'"></title>
+    <title>Listado de Reclamos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
 <div class="container mt-5">
-    <div class="col-lg-8 mx-auto">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 th:text="${reclamo.idReclamo != null} ? 'Editar Reclamo' : 'Nuevo Reclamo'"></h4>
+
+    <h1 class="mb-4 text-primary">
+        <i class="bi bi-clipboard-check-fill"></i> Gestión de Reclamos
+    </h1>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="mb-4">
+        <a href="/home" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Volver al Dashboard
+        </a>
+    </div>
+
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/reclamos}" method="get" class="row g-3">
+
+                <!-- BUSCAR POR NOMBRE -->
+                <div class="col-md-5">
+                    <input type="text" name="q" class="form-control"
+                           placeholder="Buscar por nombre del cliente..."
+                           th:value="${q}">
+                </div>
+
+                <!-- FILTRO POR ESTADO -->
+                <div class="col-md-3">
+                    <select name="estado" class="form-select">
+                        <option value="todos"        th:selected="${estado == 'todos'}">Todos</option>
+                        <option value="PENDIENTE"    th:selected="${estado == 'PENDIENTE'}">Pendiente</option>
+                        <option value="EN_PROCESO"   th:selected="${estado == 'EN_PROCESO'}">En Proceso</option>
+                        <option value="RESUELTO"     th:selected="${estado == 'RESUELTO'}">Resuelto</option>
+                        <option value="CERRADO"      th:selected="${estado == 'CERRADO'}">Cerrado</option>
+                        <option value="RECHAZADO"    th:selected="${estado == 'RECHAZADO'}">Rechazado</option>
+                    </select>
+                </div>
+
+                <!-- BOTONES -->
+                <div class="col-md-4">
+                    <button class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+
+                    <a th:href="@{/reclamos/nuevo}" class="btn btn-success ms-2">
+                        <i class="bi bi-plus-circle"></i> Nuevo Reclamo
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>N°Reclamo</th>
+                        <th>Cliente</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="r : ${reclamos}">
+                        <td><strong th:text="${r.numeroReclamo}"></strong></td>
+
+                        <td>
+                            <span th:text="${r.cliente.tipoCliente == 'persona'
+                                ? r.cliente.nombres + ' ' + r.cliente.apellidos
+                                : r.cliente.razonSocial}">
+                            </span>
+                        </td>
+
+                        <td th:text="${r.motivo}"></td>
+
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${r.estado == 'PENDIENTE' ? 'bg-warning text-dark' :
+                                                   r.estado == 'EN_PROCESO' ? 'bg-info' :
+                                                   r.estado == 'RESUELTO' ? 'bg-success' :
+                                                   r.estado == 'CERRADO' ? 'bg-secondary' :
+                                                   'bg-danger'}"
+                                  th:text="${r.estado}">
+                            </span>
+                        </td>
+
+                        <td th:text="${#temporals.format(r.fechaReclamo, 'dd/MM/yyyy HH:mm')}"></td>
+
+                        <td>
+                            <a th:href="@{/reclamos/{id}(id=${r.idReclamo})}" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            <a th:href="@{/reclamos/{id}/editar(id=${r.idReclamo})}"
+                               class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                                    th:data-id="${r.idReclamo}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+
+                    </tr>
+                    </tbody>
+
+                </table>
             </div>
+        </div>
+    </div>
+</div>
 
-            <div class="card-body">
-                <form th:action="${reclamo.idReclamo != null} ? @{/reclamos/{id}(id=${reclamo.idReclamo})} :
-                 @{/reclamos}" th:object="${reclamo}" method="post">
-                <input type="hidden" th:field="*{idReclamo}">
-
-                    <!-- Cliente -->
-                    <div class="mb-3">
-                        <label class="fw-bold">Cliente</label>
-                        <select class="form-select" th:field="*{cliente.idCliente}" required>
-                            <option value="">-- Seleccione cliente --</option>
-                            <option th:each="c : ${clientes}"
-                                    th:value="${c.idCliente}"
-                                    th:text="${c.tipoCliente == 'persona' ? c.nombres + ' ' + c.apellidos : c.razonSocial}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Motivo -->
-                    <div class="mb-3">
-                        <label class="fw-bold">Motivo</label>
-                        <input type="text" th:field="*{motivo}" class="form-control" maxlength="100" required>
-                    </div>
-
-                    <!-- Descripción -->
-                    <div class="mb-3">
-                        <label class="fw-bold">Descripción</label>
-                        <textarea th:field="*{descripcion}" class="form-control" rows="4" maxlength="1000" required></textarea>
-                    </div>
-
-                    <!-- ESTADO SOLO PARA NUEVO -->
-                    <input type="hidden" name="estado" value="PENDIENTE">
-
-                    <!-- Mostrar Estado Actual -->
-                    <div class="mb-3" th:if="${reclamo.idReclamo != null}">
-                        <label class="fw-bold">Estado Actual</label>
-                        <span class="form-control" th:text="${reclamo.estado}" readonly></span>
-                    </div>
-
-                    <!-- Usuario -->
-                    <div class="mb-3">
-                        <label class="fw-bold">Usuario que registra</label>
-                        <input type="text" class="form-control" name="usuarioNombre" required placeholder="">
-                    </div>
-
-                    <div class="text-end">
-                        <a href="/reclamos" class="btn btn-secondary">Cancelar</a>
-                        <button class="btn btn-primary">
-                            <i class="bi bi-save"></i>
-                            <span th:text="${reclamo.idReclamo != null} ? 'Actualizar' : 'Registrar'"></span>
-                        </button>
-                    </div>
-
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmar eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">¿Seguro de borrar este reclamo?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> No
+                </button>
+                <form id="deleteForm" method="post" style="display:inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Sí, borrar
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Manejo del modal de eliminación
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+
+        confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const reclamoId = button.getAttribute('data-id');
+            deleteForm.action = '/reclamos/' + reclamoId + '/eliminar';
+        });
+    });
+</script>
+
 </body>
 </html>
+
