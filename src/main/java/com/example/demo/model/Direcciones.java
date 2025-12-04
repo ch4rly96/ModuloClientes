@@ -20,8 +20,8 @@ public class Direcciones {
     private Cliente cliente;
 
     @NotBlank(message = "Debe seleccionar el tipo de dirección")
-    @Pattern(regexp = "PRINCIPAL|ENVIO|FACTURACION",
-            message = "Tipo debe ser: PRINCIPAL, ENVIO o FACTURACION")
+    @Pattern(regexp = "principal|envio|facturacion",
+            message = "Tipo debe ser: principal, envio o facturacion")
     @Column(name = "tipo_direccion", length = 20, nullable = false)
     private String tipoDireccion;
 

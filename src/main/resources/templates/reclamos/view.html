@@ -44,15 +44,6 @@
                 <span class="form-control" th:text="${reclamo.estado}" readonly></span>
             </div>
             </p>
-            <!--  <p><strong>Estado actual:</strong>
-                <span th:classappend="
-                    ${reclamo.estado == 'PENDIENTE'    ? ' bg-warning text-dark' :
-                     reclamo.estado == 'EN_PROCESO'   ? ' bg-info' :
-                     reclamo.estado == 'RESUELTO'     ? ' bg-success' :
-                     reclamo.estado == 'CERRADO'      ? ' bg-secondary' :
-                                                        ' bg-danger'}">
-                </span>
-            </p> -->
 
             <p><strong>Fecha registro:</strong>
                 <span th:text="${#temporals.format(reclamo.fechaReclamo,'dd/MM/yyyy HH:mm')}"></span>

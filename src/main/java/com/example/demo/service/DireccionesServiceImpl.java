@@ -27,6 +27,17 @@ public class DireccionesServiceImpl implements DireccionesService {
     @Override
     public Direcciones guardarDireccion(Direcciones direccion) {
         validarDireccion(direccion);
+        if ("principal".equals(direccion.getTipoDireccion())) {
+            long count = direccionesRepository.countByClienteIdClienteAndTipoDireccion(
+                    direccion.getCliente().getIdCliente(), "principal");
+            if (count > 0) {
+                throw new IllegalArgumentException("El cliente ya tiene una dirección principal.");
+            }
+        }
+
+        if (!"envio".equals(direccion.getTipoDireccion()) && !"facturacion".equals(direccion.getTipoDireccion())) {
+            throw new IllegalArgumentException("El tipo de dirección debe ser envio o facturacion.");
+        }
         return direccionesRepository.save(direccion);
     }
 
@@ -46,9 +57,9 @@ public class DireccionesServiceImpl implements DireccionesService {
 
         Long idCliente = direccion.getCliente().getIdCliente();
 
-        // Validar solo 1 PRINCIPAL
-        if ("PRINCIPAL".equals(direccion.getTipoDireccion())) {
-            long count = direccionesRepository.countByClienteIdClienteAndTipoDireccion(idCliente, "PRINCIPAL");
+        // Validar solo una direccion principal
+        if ("principal".equals(direccion.getTipoDireccion())) {
+            long count = direccionesRepository.countByClienteIdClienteAndTipoDireccion(idCliente, "principal");
             if (direccion.getIdDireccion() == null && count > 0) {
                 throw new IllegalArgumentException("Ya existe una dirección principal.");
             }
@@ -69,7 +80,7 @@ public class DireccionesServiceImpl implements DireccionesService {
 
     @Override
     public Optional<Direcciones> obtenerPrincipal(Long idCliente) {
-        return direccionesRepository.findByClienteIdClienteAndTipoDireccion(idCliente, "PRINCIPAL");
+        return direccionesRepository.findByClienteIdClienteAndTipoDireccion(idCliente, "principal");
     }
 
     @Override
@@ -86,7 +97,7 @@ public class DireccionesServiceImpl implements DireccionesService {
             throw new IllegalArgumentException("No puedes eliminar direcciones de otro cliente.");
         }
 
-        if ("PRINCIPAL".equals(dir.getTipoDireccion())) {
+        if ("principal".equals(dir.getTipoDireccion())) {
             throw new IllegalArgumentException("No se puede eliminar la dirección principal.");
         }
 

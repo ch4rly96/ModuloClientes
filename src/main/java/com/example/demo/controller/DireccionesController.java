@@ -33,7 +33,7 @@ public class DireccionesController {
         // Para el modal de nueva dirección
         model.addAttribute("nuevaDireccion", new Direcciones());
 
-        return "clientes/ficha"; // → ficha.html
+        return "clientes/view";
     }
 
     @PostMapping("/{idCliente}/direcciones")
