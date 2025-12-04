@@ -28,8 +28,8 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">¿Es Persona o Empresa?</label>
                                 <select class="form-select" th:field="*{tipoCliente}" required onchange="toggleClienteForm()">
-                                    <option value="persona">Persona Natural</option>
-                                    <option value="empresa">Empresa</option>
+                                    <option value="persona" th:selected="${cliente.tipoCliente == 'persona'}">Persona Natural</option>
+                                    <option value="empresa" th:selected="${cliente.tipoCliente == 'empresa'}">Empresa</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -45,24 +45,24 @@
                         </div>
 
                         <!-- PERSONA -->
-                        <div id="personaFields" th:if="${cliente.tipoCliente == 'persona' or cliente.tipoCliente == null}">
+                        <div id="personaFields" th:attr="style=${cliente.tipoCliente == 'persona' ? 'display:block;' : 'display:none;'}">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label>Nombres</label>
-                                    <input type="text" class="form-control" th:field="*{nombres}">
+                                    <input type="text" class="form-control" th:field="*{nombres}" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label>Apellidos</label>
-                                    <input type="text" class="form-control" th:field="*{apellidos}">
+                                    <input type="text" class="form-control" th:field="*{apellidos}" required>
                                 </div>
                             </div>
                         </div>
 
                         <!-- EMPRESA -->
-                        <div id="empresaFields" th:if="${cliente.tipoCliente == 'empresa'}">
+                        <div id="empresaFields" th:attr="style=${cliente.tipoCliente == 'empresa' ? 'display:block;' : 'display:none;'}">
                             <div class="mb-3">
                                 <label>Razón Social</label>
-                                <input type="text" class="form-control" th:field="*{razonSocial}">
+                                <input type="text" class="form-control" th:field="*{razonSocial}" required>
                             </div>
                         </div>
 
@@ -71,9 +71,9 @@
                             <div class="col-md-4">
                                 <label>Tipo Documento</label>
                                 <select class="form-select" th:field="*{tipoDocumento}" required>
-                                    <option value="DNI">DNI</option>
-                                    <option value="RUC">RUC</option>
-                                    <option value="CE">Carnet Extranjeria</option>
+                                    <option value="DNI" th:disabled="${cliente.tipoCliente == 'empresa'}">DNI</option>
+                                    <option value="RUC" th:disabled="${cliente.tipoCliente == 'persona'}">RUC</option>
+                                    <option value="CE" th:disabled="${cliente.tipoCliente == 'empresa'}">Carnet Extranjeria</option>
                                 </select>
                             </div>
                             <div class="col-md-8">
@@ -86,17 +86,17 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label>Email</label>
-                                <input type="email" class="form-control" th:field="*{email}">
+                                <input type="email" class="form-control" th:field="*{email}" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label>Teléfono</label>
-                                <input type="text" class="form-control" th:field="*{telefono}" placeholder="9 dígitos">
+                                <input type="text" class="form-control" th:field="*{telefono}" placeholder="9 dígitos" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label>Dirección Principal</label>
-                            <textarea class="form-control" th:field="*{direccionPrincipal}" rows="2"></textarea>
+                            <textarea class="form-control" th:field="*{direccionPrincipal}" rows="2" required></textarea>
                         </div>
 
                         <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -122,9 +122,47 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function confirmarGuardar() {
+    function toggleClienteForm() {
+        const tipoCliente = document.querySelector('[name="tipoCliente"]').value;
+        const personaFields = document.getElementById('personaFields');
+        const empresaFields = document.getElementById('empresaFields');
+        const tipoDocumento = document.querySelector('[name="tipoDocumento"]');
+
+        // Toggle visibility of the sections based on tipoCliente
+        if (tipoCliente === 'persona') {
+            personaFields.style.display = 'block';
+            empresaFields.style.display = 'none';
+            tipoDocumento.querySelector('[value="RUC"]').disabled = true;
+            tipoDocumento.querySelector('[value="DNI"]').disabled = false;
+            tipoDocumento.querySelector('[value="CE"]').disabled = false;
+
+            // Deshabilitar subtipo para persona
+            subtipoCliente.querySelector('[value="natural"]').disabled = false;
+            subtipoCliente.querySelector('[value="juridico"]').disabled = true;
+            subtipoCliente.querySelector('[value="constructor"]').disabled = true;
+            subtipoCliente.querySelector('[value="corporativo"]').disabled = true;
+
+        } else if (tipoCliente === 'empresa') {
+            personaFields.style.display = 'none';
+            empresaFields.style.display = 'block';
+            tipoDocumento.querySelector('[value="RUC"]').disabled = false;
+            tipoDocumento.querySelector('[value="DNI"]').disabled = true;
+            tipoDocumento.querySelector('[value="CE"]').disabled = true;
+
+            // Deshabilitar subtipo para empresa
+            subtipoCliente.querySelector('[value="natural"]').disabled = true;
+            subtipoCliente.querySelector('[value="juridico"]').disabled = false;
+            subtipoCliente.querySelector('[value="constructor"]').disabled = false;
+            subtipoCliente.querySelector('[value="corporativo"]').disabled = false;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleClienteForm(); // Call on page load to set initial state based on selected tipoCliente
+    });
+
+     function confirmarGuardar() {
         // Detectar si es edición (idCliente tiene valor) o creación
         const idInput = document.querySelector('input[name="idCliente"]');
         const isEdit = idInput && idInput.value && idInput.value.trim() !== '';
@@ -174,7 +212,14 @@
         const form = document.querySelector('form');
         if (form) form.submit();
     }
+
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
+
+
 

@@ -33,17 +33,36 @@ public class ClienteWebController {
                          @RequestParam(required = false) String q,
                          @RequestParam(defaultValue = "todos") String filtro) {
 
-        List<Cliente> clientes = clienteService.listarClientes();
-
-        if (q != null && !q.isBlank()) {
-            if ("persona".equals(filtro)) {
-                clientes = clienteService.buscarPorNombre(q);
-            } else if ("empresa".equals(filtro)) {
-                clientes = clienteService.buscarPorRazonSocial(q);
-            } else {
-                clientes = new ArrayList<>();
+        List<Cliente> clientes = new ArrayList<>();
+        // Filtro por "todos"
+        if ("todos".equals(filtro)) {
+            // Si hay texto de búsqueda, busca tanto por nombre como por razón social
+            if (q != null && !q.isBlank()) {
                 clientes.addAll(clienteService.buscarPorNombre(q));
                 clientes.addAll(clienteService.buscarPorRazonSocial(q));
+            } else {
+                // Si no hay búsqueda, obtiene todos los clientes
+                clientes = clienteService.listarClientes();
+            }
+        }
+        // Filtro por "persona"
+        else if ("persona".equals(filtro)) {
+            // Si hay texto de búsqueda, busca solo por nombre
+            if (q != null && !q.isBlank()) {
+                clientes = clienteService.buscarPorNombre(q);
+            } else {
+                // Si no hay búsqueda, filtra solo clientes de tipo "persona"
+                clientes = clienteService.listarPorTipo("persona", null);
+            }
+        }
+        // Filtro por "empresa"
+        else if ("empresa".equals(filtro)) {
+            // Si hay texto de búsqueda, busca solo por razón social
+            if (q != null && !q.isBlank()) {
+                clientes = clienteService.buscarPorRazonSocial(q);
+            } else {
+                // Si no hay búsqueda, filtra solo clientes de tipo "empresa"
+                clientes = clienteService.listarPorTipo("empresa", null);
             }
         }
 
