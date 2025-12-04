@@ -90,7 +90,7 @@ public class ReclamoWebController {
             @RequestParam String solucion,
             @RequestParam String usuarioNombre) {
         reclamoService.actualizarEstado(id, estado, solucion, usuarioNombre);
-        return "redirect:/reclamos/" + id;
+        return "redirect:/reclamos";
     }
 
     // ELIMINAR
