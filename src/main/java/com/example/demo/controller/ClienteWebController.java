@@ -203,7 +203,6 @@ public class ClienteWebController {
     public String eliminar(@PathVariable Long idCliente, RedirectAttributes flash) {
 
         clienteService.eliminar(idCliente);
-        flash.addFlashAttribute("success", "Cliente eliminado correctamente");
 
         return "redirect:/clientes";
     }

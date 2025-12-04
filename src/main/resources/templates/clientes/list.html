@@ -10,7 +10,9 @@
 <div class="container mt-5">
     <h1 class="mb-4 text-primary"><i class="bi bi-people-fill"></i> Gestión de Clientes</h1>
 
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
     <div class="mb-4">
         <a href="/home" class="btn btn-secondary">
@@ -99,11 +101,11 @@
                                class="btn btn-sm" th:classappend="${c.estado} ? 'btn-secondary' : 'btn-success'">
                                 <i th:class="${c.estado} ? 'bi bi-x-circle' : 'bi bi-check-circle'"></i>
                             </a>
-                            <a th:href="@{/clientes/eliminar/{id}(id=${c.idCliente})}"
-                               class="btn btn-sm btn-danger"
-                               onclick="return confirm('¿Seguro que deseas eliminar este cliente?');">
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                                    th:data-id="${c.idCliente}">
                                 <i class="bi bi-trash"></i>
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     </tbody>
@@ -112,6 +114,44 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Confirmar eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">¿Seguro de eliminar este cliente?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> No
+                </button>
+                <a id="confirmDeleteBtn" href="#" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Sí, eliminar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<script>
+    // Manejo del modal de eliminación
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        confirmDeleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const clienteId = button.getAttribute('data-id');
+            confirmDeleteBtn.href = '/clientes/eliminar/' + clienteId;
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
