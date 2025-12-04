@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Cliente;
+import com.example.demo.model.Direcciones;
 import com.example.demo.service.ClienteService;
+import com.example.demo.service.DireccionesService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -19,9 +21,11 @@ import java.util.List;
 public class ClienteWebController {
 
     private final ClienteService clienteService;
+    private final DireccionesService direccionesService;
 
-    public ClienteWebController(ClienteService clienteService) {
+    public ClienteWebController(ClienteService clienteService, DireccionesService direccionesService) {
         this.clienteService = clienteService;
+        this.direccionesService = direccionesService;
     }
 
     @GetMapping
@@ -150,14 +154,36 @@ public class ClienteWebController {
     public String detalle(@PathVariable Long idCliente, Model model) {
         Cliente cliente = clienteService.obtenerPorId(idCliente).orElseThrow();
         model.addAttribute("cliente", cliente);
+        model.addAttribute("direcciones", direccionesService.listarPorCliente(idCliente));
+        model.addAttribute("mostrarDirecciones", false);
         return "clientes/view";
     }
+
+    @GetMapping("/{idCliente}/direcciones/agregar")
+    public String agregarDireccion(@PathVariable Long idCliente, Model model) {
+        Cliente cliente = clienteService.obtenerPorId(idCliente)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
+        model.addAttribute("cliente", clienteService.obtenerPorId(idCliente).orElseThrow());
+        model.addAttribute("nuevaDireccion", new Direcciones());
+        return "clientes/agregarDireccion";
+    }
+
+    @GetMapping("/{idCliente}/direcciones/ver")
+    public String verDirecciones(@PathVariable Long idCliente, Model model) {
+        Cliente cliente = clienteService.obtenerPorId(idCliente).orElseThrow(() ->
+                new IllegalArgumentException("Cliente no encontrado"));
+        // Agrega el cliente al modelo
+        model.addAttribute("cliente", cliente);// Obtiene las direcciones del cliente
+        List<Direcciones> direcciones = direccionesService.listarPorCliente(idCliente);
+        model.addAttribute("direcciones", direcciones);
+        return "clientes/verDirecciones";
+    }
+
 
     @GetMapping("/eliminar/{idCliente}")
     public String eliminar(@PathVariable Long idCliente, RedirectAttributes flash) {
 
         clienteService.eliminar(idCliente);
-        flash.addFlashAttribute("success", "Cliente eliminado correctamente");
 
         return "redirect:/clientes";
     }
