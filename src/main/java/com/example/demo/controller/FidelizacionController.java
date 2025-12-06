@@ -1,90 +1,92 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Fidelizacion;
+import com.example.demo.service.ClienteService;
 import com.example.demo.service.FidelizacionService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/fidelizacion")
+@Controller
+@RequestMapping("/fidelizacion")
 public class FidelizacionController {
 
     private final FidelizacionService fidelizacionService;
+    private final ClienteService clienteService;
 
-    public FidelizacionController(FidelizacionService fidelizacionService) {
+    public FidelizacionController(FidelizacionService fidelizacionService, ClienteService clienteService) {
         this.fidelizacionService = fidelizacionService;
+        this.clienteService = clienteService;
     }
 
     // 1. LISTADOS
-
     @GetMapping
-    public ResponseEntity<List<Fidelizacion>> obtenerTodos() {
-        return ResponseEntity.ok(fidelizacionService.listarFidelizaciones());
+    public String listarClientesFidelizados(Model model) {
+        List<Fidelizacion> fidelizaciones = fidelizacionService.listarFidelizaciones();
+        model.addAttribute("fidelizaciones", fidelizaciones);
+        return "fidelizacion/lista"; // Nombre del archivo HTML para mostrar la lista de fidelización
     }
 
     @GetMapping("/nivel/{nivel}")
-    public ResponseEntity<List<Fidelizacion>> obtenerPorNivel(@PathVariable String nivel) {
+    public String obtenerPorNivel(@PathVariable String nivel, Model model) {
         try {
             Fidelizacion.NivelFidelizacion nivelEnum = Fidelizacion.NivelFidelizacion.valueOf(nivel.toUpperCase());
-            return ResponseEntity.ok(fidelizacionService.listarPorNivel(nivelEnum));
+            model.addAttribute("fidelizaciones", fidelizacionService.listarPorNivel(nivelEnum));
+            return "fidelizacion/lista";
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return "error";  // Página de error si el nivel no es válido
         }
     }
 
     @GetMapping("/top-clientes")
-    public ResponseEntity<List<Fidelizacion>> obtenerTopClientes(
-            @RequestParam(defaultValue = "10") Integer limite) {
-        return ResponseEntity.ok(fidelizacionService.listarTopClientes(limite));
+    public String obtenerTopClientes(@RequestParam(defaultValue = "10") Integer limite, Model model) {
+        model.addAttribute("fidelizaciones", fidelizacionService.listarTopClientes(limite));
+        return "fidelizacion/topClientes"; // Vista para mostrar el top de clientes
     }
 
     @GetMapping("/clientes-canje")
-    public ResponseEntity<List<Fidelizacion>> obtenerClientesParaCanje(
-            @RequestParam(defaultValue = "1") Integer puntosMinimos) {
-        return ResponseEntity.ok(fidelizacionService.listarClientesParaCanje(puntosMinimos));
+    public String obtenerClientesParaCanje(@RequestParam(defaultValue = "1") Integer puntosMinimos, Model model) {
+        model.addAttribute("fidelizaciones", fidelizacionService.listarClientesParaCanje(puntosMinimos));
+        return "fidelizacion/clienteCanje"; // Vista para mostrar clientes que pueden canjear puntos
     }
 
-    // 2. BÚSQUEDA
-
-    @GetMapping("/cliente/{idCliente}")
-    public ResponseEntity<Fidelizacion> obtenerPorCliente(@PathVariable Long idCliente) {
+    // 2. DETALLE
+    @GetMapping("/detalle/{idCliente}")
+    public String obtenerPorCliente(@PathVariable Long idCliente, Model model) {
         try {
             Fidelizacion fidelizacion = fidelizacionService.obtenerPorCliente(idCliente);
-            return ResponseEntity.ok(fidelizacion);
+            model.addAttribute("fidelizacion", fidelizacion);
+            return "fidelizacion/detalle"; // Vista para mostrar los detalles de la fidelización de un cliente
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return "error";  // Página de error si no se encuentra el cliente
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Fidelizacion> obtenerPorId(@PathVariable Long id) {
-        return fidelizacionService.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 
     // 3. CREAR
-
     @PostMapping("/cliente/{idCliente}")
-    public ResponseEntity<Fidelizacion> crearFidelizacion(@PathVariable Long idCliente) {
+    public String crearFidelizacion(@PathVariable Long idCliente, Model model) {
         try {
             Fidelizacion creado = fidelizacionService.crearFidelizacion(idCliente);
-            return ResponseEntity.status(201).body(creado);
+            model.addAttribute("fidelizacion", creado);
+            return "fidelizacion/detalle";  // Redirigir a la vista de detalle de fidelización del cliente
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return "error";  // Página de error si algo sale mal
         }
     }
 
     // 4. GESTIÓN DE PUNTOS
+    @GetMapping("/cliente/{idCliente}/agregar-puntos")
+    public String agregarPuntos(@PathVariable Long idCliente, Model model) {
+        model.addAttribute("idCliente", idCliente);
+        return "fidelizacion/agregarPuntos";  // Vista para agregar puntos
+    }
 
     @PostMapping("/cliente/{idCliente}/agregar-puntos")
-    public ResponseEntity<Fidelizacion> agregarPuntos(
-            @PathVariable Long idCliente,
-            @RequestParam Integer puntos,
-            @RequestParam(required = false) String concepto) {
+    public String agregarPuntos(@PathVariable Long idCliente, @RequestParam Integer puntos, @RequestParam(required = false) String concepto, Model model) {
         try {
             Fidelizacion actualizado;
             if (concepto != null && !concepto.trim().isEmpty()) {
@@ -92,139 +94,58 @@ public class FidelizacionController {
             } else {
                 actualizado = fidelizacionService.agregarPuntos(idCliente, puntos);
             }
-            return ResponseEntity.ok(actualizado);
+            model.addAttribute("fidelizacion", actualizado);
+            return "fidelizacion/detalle";  // Vista de los detalles de la fidelización después de agregar los puntos
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return "error";  // Página de error si algo sale mal
         }
+    }
+
+    @GetMapping("/cliente/{idCliente}/canjear-puntos")
+    public String canjearPuntos(@PathVariable Long idCliente, Model model) {
+        model.addAttribute("idCliente", idCliente);
+        return "fidelizacion/canjearPuntos";  // Vista para canjear puntos
     }
 
     @PostMapping("/cliente/{idCliente}/canjear-puntos")
-    public ResponseEntity<Fidelizacion> canjearPuntos(
-            @PathVariable Long idCliente,
-            @RequestParam Integer puntos,
-            @RequestParam(required = false) String concepto) {
+    public String canjearPuntos(@PathVariable Long idCliente, @RequestParam Integer puntos, @RequestParam(required = false) String concepto, Model model) {
         try {
             Fidelizacion actualizado = fidelizacionService.canjearPuntos(idCliente, puntos, concepto);
-            return ResponseEntity.ok(actualizado);
+            model.addAttribute("fidelizacion", actualizado);
+            return "fidelizacion/detalle";  // Redirigir a la vista de detalle después de canjear los puntos
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @PostMapping("/cliente/{idCliente}/compra")
-    public ResponseEntity<Fidelizacion> agregarPuntosPorCompra(
-            @PathVariable Long idCliente,
-            @RequestParam BigDecimal montoCompra) {
-        try {
-            fidelizacionService.agregarPuntosPorCompra(idCliente, montoCompra);
-            Fidelizacion actualizado = fidelizacionService.obtenerPorCliente(idCliente);
-            return ResponseEntity.ok(actualizado);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return "error";  // Página de error si no se pueden canjear puntos
         }
     }
 
     // 5. ACTUALIZACIONES
-
     @PutMapping("/cliente/{idCliente}/actualizar-nivel")
-    public ResponseEntity<Fidelizacion> actualizarNivel(@PathVariable Long idCliente) {
+    public String actualizarNivel(@PathVariable Long idCliente, Model model) {
         try {
             Fidelizacion actualizado = fidelizacionService.actualizarNivel(idCliente);
-            return ResponseEntity.ok(actualizado);
+            model.addAttribute("fidelizacion", actualizado);
+            return "fidelizacion/detalle";  // Redirigir al detalle con el nivel actualizado
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PutMapping("/cliente/{idCliente}/reiniciar-puntos")
-    public ResponseEntity<Fidelizacion> reiniciarPuntos(@PathVariable Long idCliente) {
-        try {
-            Fidelizacion actualizado = fidelizacionService.reiniciarPuntos(idCliente);
-            return ResponseEntity.ok(actualizado);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return "error";  // Página de error si no se encuentra el cliente
         }
     }
 
     // 6. ELIMINAR
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarFidelizacion(@PathVariable Long id) {
-        try {
-            fidelizacionService.eliminarFidelizacion(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @DeleteMapping("/cliente/{idCliente}")
-    public ResponseEntity<Void> eliminarPorCliente(@PathVariable Long idCliente) {
+    public String eliminarPorCliente(@PathVariable Long idCliente, Model model) {
         try {
             fidelizacionService.eliminarPorCliente(idCliente);
-            return ResponseEntity.noContent().build();
+            return "redirect:/fidelizacion";  // Redirigir a la lista de fidelizaciones
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            return "error";  // Página de error si no se puede eliminar
         }
     }
 
     // 7. VERIFICACIONES Y ESTADÍSTICAS
-
-    @GetMapping("/cliente/{idCliente}/puede-canjear")
-    public ResponseEntity<Boolean> puedeCanjearPuntos(
-            @PathVariable Long idCliente,
-            @RequestParam Integer puntos) {
-        try {
-            boolean puedeCanjear = fidelizacionService.puedeCanjearPuntos(idCliente, puntos);
-            return ResponseEntity.ok(puedeCanjear);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.ok(false);
-        }
-    }
-
-    @GetMapping("/cliente/{idCliente}/existe")
-    public ResponseEntity<Boolean> existeFidelizacion(@PathVariable Long idCliente) {
-        boolean existe = fidelizacionService.existeFidelizacion(idCliente);
-        return ResponseEntity.ok(existe);
-    }
-
-    @GetMapping("/cliente/{idCliente}/puntos")
-    public ResponseEntity<Integer> obtenerPuntosCliente(@PathVariable Long idCliente) {
-        try {
-            Integer puntos = fidelizacionService.obtenerPuntosCliente(idCliente);
-            return ResponseEntity.ok(puntos);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/cliente/{idCliente}/descuento")
-    public ResponseEntity<Double> obtenerDescuentoCliente(@PathVariable Long idCliente) {
-        try {
-            Double descuento = fidelizacionService.obtenerDescuentoCliente(idCliente);
-            return ResponseEntity.ok(descuento);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @GetMapping("/estadisticas")
-    public ResponseEntity<Object[]> obtenerEstadisticas() {
-        try {
-            Object[] estadisticas = fidelizacionService.obtenerEstadisticasGenerales();
-            return ResponseEntity.ok(estadisticas);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @GetMapping("/estadisticas/niveles")
-    public ResponseEntity<List<Object[]>> obtenerEstadisticasPorNivel() {
-        try {
-            List<Object[]> estadisticas = fidelizacionService.obtenerEstadisticasPorNivel();
-            return ResponseEntity.ok(estadisticas);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public String obtenerEstadisticas(Model model) {
+        model.addAttribute("estadisticas", fidelizacionService.obtenerEstadisticasGenerales());
+        model.addAttribute("estadisticasPorNivel", fidelizacionService.obtenerEstadisticasPorNivel());
+        return "fidelizacion/estadisticas";  // Vista para mostrar las estadísticas
     }
 }

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Clientes Fidelizados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h1 class="mb-4 text-primary">
+        <i class="bi bi-person-fill"></i> Gestión de Fidelización de Clientes
+    </h1>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Botón para volver al Dashboard -->
+    <div class="mb-4">
+        <a href="/home" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Volver al Dashboard
+        </a>
+    </div>
+
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/fidelizacion}" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por nombre..."
+                           th:value="${q}">
+                </div>
+                <div class="col-md-3">
+                    <select name="filtro" class="form-select">
+                        <option value="todos" th:selected="${filtro == 'todos'}">Todos</option>
+                        <option value="bronze" th:selected="${filtro == 'bronze'}">Bronze</option>
+                        <option value="silver" th:selected="${filtro == 'silver'}">Silver</option>
+                        <option value="gold" th:selected="${filtro == 'gold'}">Gold</option>
+                        <option value="platinum" th:selected="${filtro == 'platinum'}">Platinum</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary"><i class="bi bi-search"></i> Buscar</button>
+
+                    <a th:href="@{/fidelizacion/estadisticas}" class="btn btn-success ms-2">
+                        <i class="bi bi-bar-chart"></i> Estadisticas
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TABLA DE CLIENTES FIDELIZADOS -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Puntos Acumulados</th>
+                        <th>Nivel</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="clientesFidelizadosBody">
+                    <!-- Aquí se cargarán los clientes -->
+                    <tr th:each="f : ${fidelizaciones}">
+                        <td th:text="${f.cliente.nombreCompleto}"></td>
+                        <td th:text="${f.puntosAcumulados}"></td>
+                        <td th:text="${f.nivel}"></td>
+                        <td>
+                            <!-- Ver detalle -->
+                            <a th:href="@{/fidelizacion/detalle/{idCliente}(idCliente=${f.idFidelizacion})}"
+                               class="btn btn-info btn-sm">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <!-- Agregar puntos -->
+                            <a th:href="@{/fidelizacion/cliente/{idCliente}/agregar-puntos(idCliente=${f.idFidelizacion})}"
+                               class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i>
+                            </a>
+
+                            <!-- Canjear puntos -->
+                            <a th:href="@{/fidelizacion/cliente/{idCliente}/canjear-puntos(idCliente=${f.idFidelizacion})}"
+                               class="btn btn-warning btn-sm">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Función para obtener la lista de clientes fidelizados
+    function obtenerClientesFidelizados() {
+    fetch('/fidelizacion')
+    .then(response => response.json())
+    .then(data => {
+    const tbody = document.getElementById('clientesFidelizadosBody');
+    tbody.innerHTML = ''; // Limpiar tabla antes de cargar los nuevos datos
+    data.forEach(cliente => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+    <td>${cliente.cliente.nombreCompleto}</td>
+    <td>${cliente.puntosAcumulados}</td>
+    <td>${cliente.nivel}</td>
+    <td>
+        <button class="btn btn-info btn-sm" onclick="mostrarDetalleFidelizacion(${cliente.idFidelizacion})">Ver</button>
+    </td>
+    `;
+    tbody.appendChild(row);
+    });
+    })
+    .catch(error => console.error('Error al obtener clientes fidelizados:', error));
+    }
+
+    // Llamar a la función para cargar los datos al cargar la página
+    document.addEventListener('DOMContentLoaded', obtenerClientesFidelizados);
+</script>
+</body>
+</html>

@@ -60,7 +60,8 @@ public class JwtFilter extends OncePerRequestFilter {
         if (path.startsWith("/home") ||
                 path.startsWith("/clientes") ||
                 path.startsWith("/reclamos") ||
-                path.startsWith("/reportes")) {
+                path.startsWith("/reportes") ||
+                path.startsWith("/fidelizacion")) {
 
             HttpSession session = request.getSession(false);
 

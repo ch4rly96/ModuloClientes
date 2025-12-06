@@ -15,7 +15,7 @@ public class Fidelizacion {
     private Long idFidelizacion;
 
     @NotNull(message = "El cliente es obligatorio")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_cliente", referencedColumnName = "idCliente", nullable = false, unique = true)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "fidelizacion"})
     private Cliente cliente;
@@ -32,10 +32,10 @@ public class Fidelizacion {
 
     // ENUM para los niveles de fidelización
     public enum NivelFidelizacion {
-        BRONZE("Bronze", 0, 100),
-        SILVER("Silver", 101, 500),
-        GOLD("Gold", 501, 1000),
-        PLATINUM("Platinum", 1001, Integer.MAX_VALUE);
+        bronze("Bronze", 0, 100),
+        silver("Silver", 101, 500),
+        gold("Gold", 501, 1000),
+        platinum("Platinum", 1001, Integer.MAX_VALUE);
 
         private final String nombre;
         private final int puntosMinimos;
@@ -57,7 +57,7 @@ public class Fidelizacion {
                     return nivel;
                 }
             }
-            return BRONZE;
+            return bronze;
         }
     }
 
@@ -67,7 +67,7 @@ public class Fidelizacion {
     public Fidelizacion(Cliente cliente) {
         this.cliente = cliente;
         this.puntosAcumulados = 0;
-        this.nivel = NivelFidelizacion.BRONZE;
+        this.nivel = NivelFidelizacion.bronze;
         this.ultimaActualizacion = LocalDateTime.now();
     }
 
@@ -101,10 +101,10 @@ public class Fidelizacion {
 
     public Double calcularDescuento() {
         return switch (this.nivel) {
-            case BRONZE -> 0.0;      // 0% descuento
-            case SILVER -> 5.0;      // 5% descuento
-            case GOLD -> 10.0;       // 10% descuento
-            case PLATINUM -> 15.0;   // 15% descuento
+            case bronze -> 0.0;      // 0% descuento
+            case silver -> 5.0;      // 5% descuento
+            case gold -> 10.0;       // 10% descuento
+            case platinum -> 15.0;   // 15% descuento
         };
     }
 

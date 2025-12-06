@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
 
                         // Vistas web (requieren sesión)
-                        .requestMatchers("/home/**", "/clientes/**", "/reclamos/**", "/reportes/**")
+                        .requestMatchers("/home/**", "/clientes/**", "/reclamos/**", "/reportes/**", "/fidelizacion/**")
                         .authenticated()
 
                         // API protegida con roles
