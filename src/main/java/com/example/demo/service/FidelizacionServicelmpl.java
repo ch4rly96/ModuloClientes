@@ -7,6 +7,7 @@ import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.FidelizacionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -153,6 +154,24 @@ public class FidelizacionServicelmpl implements FidelizacionService {
     public List<Fidelizacion> listarClientesParaCanje(Integer puntosMinimos) {
         Integer puntosMin = (puntosMinimos == null || puntosMinimos < 0) ? 1 : puntosMinimos;
         return fidelizacionRepository.findClientesParaCanje(puntosMin);
+    }
+
+    @Override
+    public List<Fidelizacion> buscarClientesPorNombre(String q) {
+        return buscarClientes(q, null);  // Si solo se pasa el nombre, no se filtra por nivel
+    }
+
+    @Override
+    public List<Fidelizacion> buscarClientesPorNombreYTipo(String q, String nivel) {
+        return buscarClientes(q, nivel);  // Se filtra por nombre y nivel
+    }
+
+    // Método centralizado para buscar clientes por nombre y nivel
+    private List<Fidelizacion> buscarClientes(String q, String nivel) {
+        if (q != null && !q.isEmpty()) {
+            return fidelizacionRepository.buscarClientes(q, nivel);  // Llamada al repositorio con los parámetros
+        }
+        return fidelizacionRepository.findAll();  // Si no se proporciona nombre, devuelve todos los clientes
     }
 
     // === VERIFICACIONES ===

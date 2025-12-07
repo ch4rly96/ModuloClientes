@@ -33,6 +33,23 @@ public class FidelizacionController {
         return "fidelizacion/lista";
     }
 
+    @GetMapping("/fidelizacion")
+    public String listarClientesFidelizados(@RequestParam(value = "q", required = false) String q,
+                                            @RequestParam(value = "filtro", required = false, defaultValue = "todos") String filtro,
+                                            @RequestParam(value = "nivel", required = false) String nivel,
+                                            Model model) {
+
+        // Se utiliza el método flexible para filtrar por nombre y nivel
+        List<Fidelizacion> fidelizaciones = fidelizacionService.buscarClientesPorNombreYTipo(q, nivel);
+
+        model.addAttribute("fidelizaciones", fidelizaciones);
+        model.addAttribute("q", q);
+        model.addAttribute("filtro", filtro);
+        model.addAttribute("nivel", nivel);
+
+        return "fidelizacion/lista";
+    }
+
     @GetMapping("/nivel/{nivel}")
     public String obtenerPorNivel(@PathVariable String nivel, Model model) {
         try {

@@ -15,9 +15,17 @@ public interface FidelizacionRepository extends JpaRepository<Fidelizacion, Long
 
     // === BÚSQUEDA POR CLIENTE ===
     Optional<Fidelizacion> findByClienteIdCliente(Long idCliente);
+    List<Fidelizacion> findByNivel(@Param("nivel") Fidelizacion.NivelFidelizacion nivel);
 
-    // === BÚSQUEDA POR NIVEL ===
-    List<Fidelizacion> findByNivel(NivelFidelizacion nivel);
+    // Búsqueda por nombre de cliente y nivel
+    @Query("SELECT f FROM Fidelizacion f " +
+            "WHERE (" +
+            "LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, '')))) LIKE LOWER(CONCAT('%', :q, '%')) " + // Búsqueda por persona
+            "OR LOWER(FUNCTION('unaccent', f.cliente.razonSocial)) LIKE LOWER(CONCAT('%', :q, '%'))" + // Búsqueda por empresa
+            ") " +
+            "AND (:nivel IS NULL OR f.nivel = :nivel) " + // Filtro por nivel si se proporciona
+            "ORDER BY f.cliente.nombres")
+    List<Fidelizacion> buscarClientes(@Param("q") String q, @Param("nivel") String nivel);
 
     // === FILTROS POR PUNTOS ===
     List<Fidelizacion> findByPuntosAcumuladosGreaterThanEqual(Integer puntosMinimos);

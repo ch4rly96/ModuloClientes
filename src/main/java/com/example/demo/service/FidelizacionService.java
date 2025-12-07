@@ -29,6 +29,8 @@ public interface FidelizacionService {
     List<Fidelizacion> listarPorNivel(Fidelizacion.NivelFidelizacion nivel);
     List<Fidelizacion> listarTopClientes(Integer limite);
     List<Fidelizacion> listarClientesParaCanje(Integer puntosMinimos);
+    List<Fidelizacion> buscarClientesPorNombre(String q);
+    List<Fidelizacion> buscarClientesPorNombreYTipo(String q, String nivel);
 
     // === VERIFICACIONES ===
     boolean existeFidelizacion(Long idCliente);
