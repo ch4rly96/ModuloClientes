@@ -38,10 +38,11 @@ public interface FidelizacionRepository extends JpaRepository<Fidelizacion, Long
     @Query("SELECT f FROM Fidelizacion f WHERE f.puntosAcumulados >= :puntosMinimos ORDER BY f.puntosAcumulados DESC")
     List<Fidelizacion> findClientesParaCanje(@Param("puntosMinimos") Integer puntosMinimos);
 
-    // === ESTADÍSTICAS DE FIDELIZACIÓN ===
+    // Consultas para obtener estadísticas generales
     @Query("SELECT COUNT(f), COALESCE(SUM(f.puntosAcumulados), 0), COALESCE(AVG(f.puntosAcumulados), 0) FROM Fidelizacion f")
     Object[] obtenerEstadisticasGenerales();
 
+    // Consultas para obtener estadísticas por nivel
     @Query("SELECT f.nivel, COUNT(f), COALESCE(AVG(f.puntosAcumulados), 0) FROM Fidelizacion f GROUP BY f.nivel")
     List<Object[]> obtenerEstadisticasPorNivel();
 

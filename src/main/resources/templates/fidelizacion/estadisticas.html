@@ -7,58 +7,39 @@
 </head>
 <body>
 <div class="container mt-5">
-<div class="card mt-4">
-    <div class="card-header bg-success text-white d-flex justify-content-between">
-        <h4>Estadísticas de Fidelización</h4>
-        <a th:href="@{/fidelizacion}" class="btn btn-light btn-sm">Volver</a>
-    </div>
-    <div class="card-body">
-        <div>
-            <h5>Estadísticas Generales</h5>
-            <p>Total Clientes: <span id="totalClientes">0</span></p>
-            <p>Total Puntos Acumulados: <span id="totalPuntos">0</span></p>
-            <p>Promedio de Puntos: <span id="promedioPuntos">0</span></p>
+    <div class="card mt-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between">
+            <h4>Estadísticas de Fidelización</h4>
+            <a th:href="@{/fidelizacion}" class="btn btn-light btn-sm">Volver</a>
         </div>
-        <div>
-            <h5>Estadísticas por Nivel</h5>
-            <table id="estadisticasNiveles" class="table">
-                <!-- Aquí se cargarán los niveles -->
-            </table>
+        <div class="card-body">
+            <div>
+                <h5>Estadísticas Generales</h5>
+                <p>Total Clientes: <span th:text="${totalClientes}">0</span></p>
+                <p>Total Puntos Acumulados: <span th:text="${totalPuntos}">0</span></p>
+                <p>Promedio de Puntos: <span th:text="${promedioPuntos}">0</span></p>
+            </div>
+            <div>
+                <h5>Estadísticas por Nivel</h5>
+                <table id="estadisticasNiveles" class="table">
+                    <thead>
+                    <tr>
+                        <th>Nivel</th>
+                        <th>Cantidad de Clientes</th>
+                        <th>Promedio de Puntos</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="nivel : ${estadisticasPorNivel}">
+                        <td th:text="${nivel[0]}"></td>
+                        <td th:text="${nivel[1]}"></td>
+                        <td th:text="${nivel[2]}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
-</div>
-<script>
-    // Función para obtener las estadísticas de fidelización
-function obtenerEstadisticas() {
-    fetch('/fidelizacion/estadisticas')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('totalClientes').textContent = data[0]; // Total clientes
-            document.getElementById('totalPuntos').textContent = data[1]; // Total puntos acumulados
-            document.getElementById('promedioPuntos').textContent = data[2]; // Promedio puntos
-
-            // Estadísticas por nivel
-            const estadisticasNiveles = data[3];
-            const table = document.getElementById('estadisticasNiveles');
-            table.innerHTML = ''; // Limpiar tabla antes de cargar los datos
-
-            estadisticasNiveles.forEach(nivel => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${nivel[0]}</td>
-                    <td>${nivel[1]}</td>
-                    <td>${nivel[2]}</td>
-                `;
-                table.appendChild(row);
-            });
-        })
-        .catch(error => console.error('Error al obtener estadísticas:', error));
-}
-
-// Llamar a la función para cargar las estadísticas al cargar la página
-document.addEventListener('DOMContentLoaded', obtenerEstadisticas);
-
-</script>
 </body>
 </html>

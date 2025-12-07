@@ -9,54 +9,27 @@
 <div class="container mt-5">
 <div class="card mt-4">
     <div class="card-header bg-warning text-white">
-        <h4>Canjear Puntos de un Cliente</h4>
+        <h4>Canjear Puntos del Cliente</h4>
     </div>
     <div class="card-body">
-        <form id="formCanjearPuntos">
+        <!-- Aquí no es necesario el campo para el ID del cliente -->
+        <form th:action="@{/fidelizacion/cliente/{idCliente}/canjear-puntos(idCliente=${idCliente})}" method="post">
             <div class="mb-3">
-                <label for="clienteIdCanje" class="form-label">ID del Cliente</label>
-                <input type="number" class="form-control" id="clienteIdCanje" required>
+                <label for="puntos" class="form-label">Puntos a Canjear</label>
+                <input type="number" class="form-control" name="puntos" id="puntos" required min="1">
             </div>
             <div class="mb-3">
-                <label for="puntosCanje" class="form-label">Puntos a Canjear</label>
-                <input type="number" class="form-control" id="puntosCanje" required>
-            </div>
-            <div class="mb-3">
-                <label for="conceptoCanje" class="form-label">Concepto (opcional)</label>
-                <input type="text" class="form-control" id="conceptoCanje">
+                <label for="concepto" class="form-label">Concepto (opcional)</label>
+                <input type="text" class="form-control" name="concepto" id="concepto">
             </div>
             <div class="text-end">
                 <a th:href="@{/fidelizacion}" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-warning">Canjear Puntos</button>
+                <button type="submit" class="btn btn-success">Agregar Puntos</button>
             </div>
         </form>
     </div>
 </div>
 </div>
-<script>
-    // Función para canjear puntos de un cliente
-document.getElementById('formCanjearPuntos').addEventListener('submit', function (e) {
-    e.preventDefault();
 
-    const clienteId = document.getElementById('clienteIdCanje').value;
-    const puntos = document.getElementById('puntosCanje').value;
-    const concepto = document.getElementById('conceptoCanje').value;
-
-    const url = `/fidelizacion/cliente/${clienteId}/canjear-puntos?puntos=${puntos}&concepto=${concepto}`;
-
-    fetch(url, {
-        method: 'POST',
-    })
-        .then(response => response.json())
-        .then(data => {
-            alert('Puntos canjeados correctamente');
-            obtenerClientesFidelizados(); // Recargar lista de clientes
-        })
-        .catch(error => {
-            console.error('Error al canjear puntos:', error);
-            alert('Error al canjear puntos');
-        });
-});
-</script>
 </body>
 </html>

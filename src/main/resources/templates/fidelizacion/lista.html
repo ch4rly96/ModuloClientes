@@ -77,13 +77,13 @@
                                 <i class="bi bi-eye"></i>
                             </a>
                             <!-- Agregar puntos -->
-                            <a th:href="@{/fidelizacion/cliente/{idCliente}/agregar-puntos(idCliente=${f.idFidelizacion})}"
+                            <a th:href="@{/fidelizacion/cliente/{idCliente}/agregar-puntos(idCliente=${f.cliente.idCliente})}"
                                class="btn btn-success btn-sm">
                                 <i class="bi bi-plus-circle"></i>
                             </a>
 
                             <!-- Canjear puntos -->
-                            <a th:href="@{/fidelizacion/cliente/{idCliente}/canjear-puntos(idCliente=${f.idFidelizacion})}"
+                            <a th:href="@{/fidelizacion/cliente/{idCliente}/canjear-puntos(idCliente=${f.cliente.idCliente})}"
                                class="btn btn-warning btn-sm">
                                 <i class="bi bi-arrow-repeat"></i>
                             </a>

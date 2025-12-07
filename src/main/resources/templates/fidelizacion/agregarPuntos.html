@@ -7,57 +7,29 @@
 </head>
 <body>
 <div class="container mt-5">
-<div class="card mt-4">
-    <div class="card-header bg-info text-white">
-        <h4>Agregar Puntos a un Cliente</h4>
-    </div>
-    <div class="card-body">
-        <form id="formAgregarPuntos">
-            <div class="mb-3">
-                <label for="clienteId" class="form-label">ID del Cliente</label>
-                <input type="number" class="form-control" id="clienteId" required>
-            </div>
-            <div class="mb-3">
-                <label for="puntos" class="form-label">Puntos a Agregar</label>
-                <input type="number" class="form-control" id="puntos" required>
-            </div>
-            <div class="mb-3">
-                <label for="concepto" class="form-label">Concepto (opcional)</label>
-                <input type="text" class="form-control" id="concepto">
-            </div>
-            <div class="text-end">
-            <a th:href="@{/fidelizacion}" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-success">Agregar Puntos</button>
-            </div>
-        </form>
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h4>Agregar Puntos al Cliente</h4>
+        </div>
+        <div class="card-body">
+            <!-- Aquí no es necesario el campo para el ID del cliente -->
+            <form th:action="@{/fidelizacion/cliente/{idCliente}/agregar-puntos(idCliente=${idCliente})}" method="post">
+                <div class="mb-3">
+                    <label for="puntos" class="form-label">Puntos a Agregar</label>
+                    <input type="number" class="form-control" name="puntos" id="puntos" required min="1">
+                </div>
+                <div class="mb-3">
+                    <label for="concepto" class="form-label">Concepto (opcional)</label>
+                    <input type="text" class="form-control" name="concepto" id="concepto">
+                </div>
+                <div class="text-end">
+                    <a th:href="@{/fidelizacion}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Agregar Puntos</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-</div>
 
-<script>
-    // Función para agregar puntos a un cliente
-document.getElementById('formAgregarPuntos').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const clienteId = document.getElementById('clienteId').value;
-    const puntos = document.getElementById('puntos').value;
-    const concepto = document.getElementById('concepto').value;
-
-    const url = `/fidelizacion/cliente/${clienteId}/agregar-puntos?puntos=${puntos}&concepto=${concepto}`;
-
-    fetch(url, {
-        method: 'POST',
-    })
-        .then(response => response.json())
-        .then(data => {
-            alert('Puntos agregados correctamente');
-            obtenerClientesFidelizados(); // Recargar lista de clientes
-        })
-        .catch(error => {
-            console.error('Error al agregar puntos:', error);
-            alert('Error al agregar puntos');
-        });
-});
-</script>
 </body>
 </html>
