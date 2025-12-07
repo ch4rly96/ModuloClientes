@@ -26,7 +26,7 @@
     <!-- FILTROS Y BÚSQUEDA -->
     <div class="card mb-4">
         <div class="card-body">
-            <form th:action="@{/fidelizacion}" class="row g-3">
+            <form th:action="@{/fidelizacion}" method="get" class="row g-3">
                 <div class="col-md-5">
                     <input type="text" name="q" class="form-control" placeholder="Buscar por nombre..."
                            th:value="${q}">
@@ -42,12 +42,12 @@
                 </div>
                 <div class="col-md-3">
                     <button class="btn btn-primary"><i class="bi bi-search"></i> Buscar</button>
-
                     <a th:href="@{/fidelizacion/estadisticas}" class="btn btn-success ms-2">
-                        <i class="bi bi-bar-chart"></i> Estadisticas
+                        <i class="bi bi-bar-chart"></i> Estadísticas
                     </a>
                 </div>
             </form>
+
         </div>
     </div>
 
@@ -64,7 +64,7 @@
                         <th>Acciones</th>
                     </tr>
                     </thead>
-                    <tbody id="clientesFidelizadosBody">
+                    <tbody>
                     <!-- Aquí se cargarán los clientes -->
                     <tr th:each="f : ${fidelizaciones}">
                         <td th:text="${f.cliente.nombreCompleto}"></td>
@@ -95,33 +95,7 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Función para obtener la lista de clientes fidelizados
-    function obtenerClientesFidelizados() {
-    fetch('/fidelizacion')
-    .then(response => response.json())
-    .then(data => {
-    const tbody = document.getElementById('clientesFidelizadosBody');
-    tbody.innerHTML = ''; // Limpiar tabla antes de cargar los nuevos datos
-    data.forEach(cliente => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-    <td>${cliente.cliente.nombreCompleto}</td>
-    <td>${cliente.puntosAcumulados}</td>
-    <td>${cliente.nivel}</td>
-    <td>
-        <button class="btn btn-info btn-sm" onclick="mostrarDetalleFidelizacion(${cliente.idFidelizacion})">Ver</button>
-    </td>
-    `;
-    tbody.appendChild(row);
-    });
-    })
-    .catch(error => console.error('Error al obtener clientes fidelizados:', error));
-    }
-
-    // Llamar a la función para cargar los datos al cargar la página
-    document.addEventListener('DOMContentLoaded', obtenerClientesFidelizados);
-</script>
 </body>
 </html>
+
+
