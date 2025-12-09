@@ -47,7 +47,7 @@
         </div>
 
         <p class="text-center text-muted mt-3">
-            <span th:text="'(Natural: ' + ${clientesNaturales} + '% , Jurídico: ' + ${clientesJuridicos} + '% , Constructor: ' + ${clientesConstructor} + '% , Corporativo: ' + ${clientesCorporativos} + '%)'"></span>
+            <span th:text="'(Natural: ' + ${porcentajeNaturales} + '% , Jurídico: ' + ${porcentajeJuridicos} + '% , Constructor: ' + ${porcentajeConstructor} + '% , Corporativo: ' + ${porcentajeCorporativos} + '%)'"></span>
         </p>
     </div>
 
@@ -105,17 +105,36 @@
             Chart.getChart("chartSegmentacion").destroy();
         }
 
+        // Obtener los datos del backend (pasados por Thymeleaf)
+        let clientesNaturales = [[${porcentajeNaturales}]];
+        let clientesJuridicos = [[${porcentajeJuridicos}]];
+        let clientesConstructor = [[${porcentajeConstructor}]];
+        let clientesCorporativos = [[${porcentajeCorporativos}]];
+
+        // Calcular la suma total de porcentajes
+        let total = clientesNaturales + clientesJuridicos + clientesConstructor + clientesCorporativos;
+
+        // Normalizar los valores si no suman 100%
+        clientesNaturales = (clientesNaturales / total) * 100;
+        clientesJuridicos = (clientesJuridicos / total) * 100;
+        clientesConstructor = (clientesConstructor / total) * 100;
+        clientesCorporativos = (clientesCorporativos / total) * 100;
+
+        clientesNaturales = clientesNaturales.toFixed(2);
+        clientesJuridicos = clientesJuridicos.toFixed(2);
+        clientesConstructor = clientesConstructor.toFixed(2);
+        clientesCorporativos = clientesCorporativos.toFixed(2);
+
         new Chart(canvas, {
             type: 'doughnut',
             data: {
                 labels: ['Natural', 'Jurídico', 'Constructor', 'Corporativo'],
                 datasets: [{
                     data: [
-                        /* Usamos los porcentajes pasados desde Thymeleaf */
-                        [[${porcentajeNaturales}]],
-                        [[${porcentajeJuridicos}]],
-                        [[${porcentajeConstructor}]],
-                        [[${porcentajeCorporativos}]]
+                        clientesNaturales,
+                        clientesJuridicos,
+                        clientesConstructor,
+                        clientesCorporativos
                     ],
                     backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545'],
                     borderColor: '#fff',
@@ -128,7 +147,6 @@
                     legend: { position: 'bottom' },
                     tooltip: {
                         callbacks: {
-                            // Formatear los tooltips para que se muestren como porcentaje
                             label: function(tooltipItem) {
                                 return tooltipItem.raw.toFixed(2) + '%';
                             }

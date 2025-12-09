@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.service.ClienteService;
+import com.example.demo.service.FidelizacionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,9 @@ public class HomeController {
     @Autowired
     private ClienteService clienteService;
 
+    @Autowired
+    private FidelizacionService fidelizacionService;
+
     @GetMapping("/home")
     public String home(Model model) {
         long totalClientes = clienteService.listarClientes().size(); // Usamos listarClientes() para obtener el total
@@ -19,19 +23,19 @@ public class HomeController {
         long clientesMorosos = clienteService.listarMorosos().size(); // Usamos listarMorosos() para obtener clientes morosos
 
         // Asumimos que "Clientes en Fidelización" es algún tipo de cliente, por ejemplo "persona" y "fidelizacion"
-        long clientesEnFidelizacion = clienteService.listarPorTipo("persona", "fidelizacion").size();
+        long clientesEnFidelizacion = fidelizacionService.listarFidelizaciones().size();
 
         // Obtener segmentación por tipo
-        long clientesNaturales = clienteService.contarClientesPorTipo("persona");
-        long clientesJuridicos = clienteService.contarClientesPorTipo("empresa");
+        long clientesNaturales = clienteService.contarClientesPorSubtipo("persona", "natural");
+        long clientesJuridicos = clienteService.contarClientesPorSubtipo("empresa", "juridico");
         long clientesConstructor = clienteService.contarClientesPorSubtipo("empresa", "constructor");
         long clientesCorporativos = clienteService.contarClientesPorSubtipo("empresa", "corporativo");
 
         // Calcular los porcentajes
-        double porcentajeNaturales = (double) clientesNaturales / totalClientes * 100;
-        double porcentajeJuridicos = (double) clientesJuridicos / totalClientes * 100;
-        double porcentajeConstructor = (double) clientesConstructor / totalClientes * 100;
-        double porcentajeCorporativos = (double) clientesCorporativos / totalClientes * 100;
+        double porcentajeNaturales = Math.round((double) clientesNaturales / totalClientes * 100 * 100.0) / 100.0;
+        double porcentajeJuridicos = Math.round((double) clientesJuridicos / totalClientes * 100 * 100.0) / 100.0;
+        double porcentajeConstructor = Math.round((double) clientesConstructor / totalClientes * 100 * 100.0) / 100.0;
+        double porcentajeCorporativos = Math.round((double) clientesCorporativos / totalClientes * 100 * 100.0) / 100.0;
 
         // Pasar los datos al modelo para Thymeleaf
         model.addAttribute("totalClientes", totalClientes);
