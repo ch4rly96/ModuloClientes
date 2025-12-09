@@ -11,28 +11,28 @@
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-people text-primary"></i>
-                <h3>2,548</h3>
+                <h3 th:text="${totalClientes}"></h3>
                 <p class="text-muted">Total Clientes</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-check-circle text-success"></i>
-                <h3>1,892</h3>
+                <h3 th:text="${clientesActivos}"></h3>
                 <p class="text-muted">Clientes Activos</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-star text-warning"></i>
-                <h3>1,245</h3>
+                <h3 th:text="${clientesEnFidelizacion}"></h3>
                 <p class="text-muted">En Fidelización</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-exclamation-triangle text-danger"></i>
-                <h3>342</h3>
+                <h3 th:text="${clientesMorosos}"></h3>
                 <p class="text-muted">Morosos</p>
             </div>
         </div>
@@ -47,10 +47,9 @@
         </div>
 
         <p class="text-center text-muted mt-3">
-            (Natural: 45%, Jurídico: 30%, Constructor: 15%, Corporativo: 10%)
+            <span th:text="'(Natural: ' + ${clientesNaturales} + '% , Jurídico: ' + ${clientesJuridicos} + '% , Constructor: ' + ${clientesConstructor} + '% , Corporativo: ' + ${clientesCorporativos} + '%)'"></span>
         </p>
     </div>
-
 
     <!-- TABLA -->
     <div class="card shadow-sm p-3">
@@ -95,7 +94,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
@@ -112,7 +110,13 @@
             data: {
                 labels: ['Natural', 'Jurídico', 'Constructor', 'Corporativo'],
                 datasets: [{
-                    data: [45, 30, 15, 10],
+                    data: [
+                        /* Usamos los porcentajes pasados desde Thymeleaf */
+                        [[${porcentajeNaturales}]],
+                        [[${porcentajeJuridicos}]],
+                        [[${porcentajeConstructor}]],
+                        [[${porcentajeCorporativos}]]
+                    ],
                     backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545'],
                     borderColor: '#fff',
                     borderWidth: 4
@@ -121,7 +125,15 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            // Formatear los tooltips para que se muestren como porcentaje
+                            label: function(tooltipItem) {
+                                return tooltipItem.raw.toFixed(2) + '%';
+                            }
+                        }
+                    }
                 }
             }
         });
