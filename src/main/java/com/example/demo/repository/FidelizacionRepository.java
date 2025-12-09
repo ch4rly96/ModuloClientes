@@ -17,15 +17,22 @@ public interface FidelizacionRepository extends JpaRepository<Fidelizacion, Long
     Optional<Fidelizacion> findByClienteIdCliente(Long idCliente);
     List<Fidelizacion> findByNivel(@Param("nivel") Fidelizacion.NivelFidelizacion nivel);
 
-    // Búsqueda por nombre de cliente y nivel
+    // Búsqueda por nombre de cliente y nivel (CORREGIDO)
     @Query("SELECT f FROM Fidelizacion f " +
-            "WHERE (" +
-            "LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, '')))) LIKE LOWER(CONCAT('%', :q, '%')) " + // Búsqueda por persona
-            "OR LOWER(FUNCTION('unaccent', f.cliente.razonSocial)) LIKE LOWER(CONCAT('%', :q, '%'))" + // Búsqueda por empresa
-            ") " +
-            "AND (:nivel IS NULL OR f.nivel = :nivel) " + // Filtro por nivel si se proporciona
+            "WHERE (LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, '')))) " +
+            "LIKE LOWER(CONCAT('%', FUNCTION('unaccent', COALESCE(:q, '')), '%')) " +
+            "OR LOWER(FUNCTION('unaccent', f.cliente.razonSocial)) " +
+            "LIKE LOWER(CONCAT('%', FUNCTION('unaccent', COALESCE(:q, '')), '%'))) " +
+            "AND (:nivel IS NULL OR :nivel = '' OR LOWER(CAST(f.nivel AS string)) LIKE LOWER(CONCAT('%', :nivel, '%'))) " +
             "ORDER BY f.cliente.nombres")
     List<Fidelizacion> buscarClientes(@Param("q") String q, @Param("nivel") String nivel);
+
+    // Nueva consulta para búsqueda flexible por cualquier parte del nombre
+    @Query("SELECT f FROM Fidelizacion f " +
+            "WHERE (LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, ''), ' ', COALESCE(f.cliente.razonSocial, '')))) " +
+            "LIKE LOWER(CONCAT('%', FUNCTION('unaccent', :termino), '%'))) " +
+            "ORDER BY f.cliente.nombres")
+    List<Fidelizacion> buscarPorCualquierParteDelNombre(@Param("termino") String termino);
 
     // === FILTROS POR PUNTOS ===
     List<Fidelizacion> findByPuntosAcumuladosGreaterThanEqual(Integer puntosMinimos);
@@ -36,7 +43,7 @@ public interface FidelizacionRepository extends JpaRepository<Fidelizacion, Long
     List<Fidelizacion> findByOrderByPuntosAcumuladosDesc();
 
     // === TOP N CLIENTES CON MÁS PUNTOS ===
-    @Query("SELECT f FROM Fidelizacion f ORDER BY f.puntosAcumulados DESC LIMIT :limite")
+    @Query(value = "SELECT f FROM Fidelizacion f ORDER BY f.puntosAcumulados DESC")
     List<Fidelizacion> findTopClientes(@Param("limite") Integer limite);
 
     // === BÚSQUEDA POR RANGO DE FECHAS ===

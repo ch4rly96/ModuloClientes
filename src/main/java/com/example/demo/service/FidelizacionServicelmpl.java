@@ -1,5 +1,4 @@
 package com.example.demo.service;
-import java.math.BigDecimal;
 
 import com.example.demo.model.Cliente;
 import com.example.demo.model.Fidelizacion;
@@ -7,9 +6,9 @@ import com.example.demo.repository.ClienteRepository;
 import com.example.demo.repository.FidelizacionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -158,20 +157,27 @@ public class FidelizacionServicelmpl implements FidelizacionService {
 
     @Override
     public List<Fidelizacion> buscarClientesPorNombre(String q) {
-        return buscarClientes(q, null);  // Si solo se pasa el nombre, no se filtra por nivel
+        if (q != null && !q.trim().isEmpty()) {
+            // Usar la nueva búsqueda flexible que busca en cualquier parte del nombre
+            return fidelizacionRepository.buscarPorCualquierParteDelNombre(q.trim());
+        }
+        return fidelizacionRepository.findAll();
     }
 
     @Override
     public List<Fidelizacion> buscarClientesPorNombreYTipo(String q, String nivel) {
-        return buscarClientes(q, nivel);  // Se filtra por nombre y nivel
-    }
-
-    // Método centralizado para buscar clientes por nombre y nivel
-    private List<Fidelizacion> buscarClientes(String q, String nivel) {
-        if (q != null && !q.isEmpty()) {
-            return fidelizacionRepository.buscarClientes(q, nivel);  // Llamada al repositorio con los parámetros
+        // Si ambos parámetros están vacíos, devolver todos
+        if ((q == null || q.trim().isEmpty()) && (nivel == null || nivel.trim().isEmpty())) {
+            return fidelizacionRepository.findAll();
         }
-        return fidelizacionRepository.findAll();  // Si no se proporciona nombre, devuelve todos los clientes
+
+        // Si solo hay término de búsqueda, usar búsqueda flexible
+        if (q != null && !q.trim().isEmpty() && (nivel == null || nivel.trim().isEmpty())) {
+            return fidelizacionRepository.buscarPorCualquierParteDelNombre(q.trim());
+        }
+
+        // Usar la búsqueda combinada
+        return fidelizacionRepository.buscarClientes(q, nivel);
     }
 
     // === VERIFICACIONES ===
@@ -227,6 +233,7 @@ public class FidelizacionServicelmpl implements FidelizacionService {
         return obtenerPorCliente(idCliente);
     }
 
+    @Override
     public void agregarPuntosPorCompra(Long idCliente, BigDecimal montoCompra) {
         if (montoCompra == null || montoCompra.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El monto de compra debe ser positivo");
