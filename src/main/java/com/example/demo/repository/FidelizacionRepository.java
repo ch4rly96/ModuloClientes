@@ -1,69 +1,78 @@
 package com.example.demo.repository;
 
 import com.example.demo.model.Fidelizacion;
-import com.example.demo.model.Fidelizacion.NivelFidelizacion;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface FidelizacionRepository extends JpaRepository<Fidelizacion, Long> {
-
-    // === BÚSQUEDA POR CLIENTE ===
     Optional<Fidelizacion> findByClienteIdCliente(Long idCliente);
+
     List<Fidelizacion> findByNivel(@Param("nivel") Fidelizacion.NivelFidelizacion nivel);
 
-    // Búsqueda por nombre de cliente y nivel (CORREGIDO)
-    @Query("SELECT f FROM Fidelizacion f " +
-            "WHERE (LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, '')))) " +
-            "LIKE LOWER(CONCAT('%', FUNCTION('unaccent', COALESCE(:q, '')), '%')) " +
-            "OR LOWER(FUNCTION('unaccent', f.cliente.razonSocial)) " +
-            "LIKE LOWER(CONCAT('%', FUNCTION('unaccent', COALESCE(:q, '')), '%'))) " +
-            "AND (:nivel IS NULL OR :nivel = '' OR LOWER(CAST(f.nivel AS string)) LIKE LOWER(CONCAT('%', :nivel, '%'))) " +
-            "ORDER BY f.cliente.nombres")
+    @Query("SELECT f FROM Fidelizacion f WHERE (LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, '')))) LIKE LOWER(CONCAT('%', FUNCTION('unaccent', COALESCE(:q, '')), '%')) OR LOWER(FUNCTION('unaccent', f.cliente.razonSocial)) LIKE LOWER(CONCAT('%', FUNCTION('unaccent', COALESCE(:q, '')), '%'))) AND (:nivel IS NULL OR :nivel = '' OR LOWER(CAST(f.nivel AS string)) LIKE LOWER(CONCAT('%', :nivel, '%'))) ORDER BY f.cliente.nombres")
     List<Fidelizacion> buscarClientes(@Param("q") String q, @Param("nivel") String nivel);
 
-    // Nueva consulta para búsqueda flexible por cualquier parte del nombre
-    @Query("SELECT f FROM Fidelizacion f " +
-            "WHERE (LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, ''), ' ', COALESCE(f.cliente.razonSocial, '')))) " +
-            "LIKE LOWER(CONCAT('%', FUNCTION('unaccent', :termino), '%'))) " +
-            "ORDER BY f.cliente.nombres")
+    @Query("SELECT f FROM Fidelizacion f WHERE (LOWER(FUNCTION('unaccent', CONCAT(COALESCE(f.cliente.nombres, ''), ' ', COALESCE(f.cliente.apellidos, ''), ' ', COALESCE(f.cliente.razonSocial, '')))) LIKE LOWER(CONCAT('%', FUNCTION('unaccent', :termino), '%'))) ORDER BY f.cliente.nombres")
     List<Fidelizacion> buscarPorCualquierParteDelNombre(@Param("termino") String termino);
 
-    // === FILTROS POR PUNTOS ===
     List<Fidelizacion> findByPuntosAcumuladosGreaterThanEqual(Integer puntosMinimos);
+
     List<Fidelizacion> findByPuntosAcumuladosLessThanEqual(Integer puntosMaximos);
+
     List<Fidelizacion> findByPuntosAcumuladosBetween(Integer puntosMin, Integer puntosMax);
 
-    // === CLIENTES CON MÁS PUNTOS ===
     List<Fidelizacion> findByOrderByPuntosAcumuladosDesc();
 
-    // === TOP N CLIENTES CON MÁS PUNTOS ===
-    @Query(value = "SELECT f FROM Fidelizacion f ORDER BY f.puntosAcumulados DESC")
+    @Query("SELECT f FROM Fidelizacion f ORDER BY f.puntosAcumulados DESC")
     List<Fidelizacion> findTopClientes(@Param("limite") Integer limite);
 
-    // === BÚSQUEDA POR RANGO DE FECHAS ===
-    List<Fidelizacion> findByUltimaActualizacionBetween(java.time.LocalDateTime fechaInicio, java.time.LocalDateTime fechaFin);
+    List<Fidelizacion> findByUltimaActualizacionBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
-    // === CLIENTES ELEGIBLES PARA CANJE (más de X puntos) ===
     @Query("SELECT f FROM Fidelizacion f WHERE f.puntosAcumulados >= :puntosMinimos ORDER BY f.puntosAcumulados DESC")
     List<Fidelizacion> findClientesParaCanje(@Param("puntosMinimos") Integer puntosMinimos);
 
-    // Consultas para obtener estadísticas generales
-    @Query("SELECT COUNT(f), COALESCE(SUM(f.puntosAcumulados), 0), COALESCE(AVG(f.puntosAcumulados), 0) FROM Fidelizacion f")
+    // ============ CONSULTAS DE ESTADÍSTICAS CORREGIDAS (NATIVE QUERIES) ============
+
+    // Consulta nativa para estadísticas generales - usa el nombre real de la tabla
+    @Query(value = "SELECT " +
+            "COUNT(*) as totalClientes, " +
+            "COALESCE(SUM(puntos_acumulados), 0) as totalPuntos, " +
+            "CASE WHEN COUNT(*) > 0 THEN COALESCE(AVG(puntos_acumulados), 0.0) ELSE 0.0 END as promedioPuntos " +
+            "FROM fidelizacion_clientes", nativeQuery = true)
     Object[] obtenerEstadisticasGenerales();
 
-    // Consultas para obtener estadísticas por nivel
-    @Query("SELECT f.nivel, COUNT(f), COALESCE(AVG(f.puntosAcumulados), 0) FROM Fidelizacion f GROUP BY f.nivel")
+    // Consulta nativa para estadísticas por nivel - usa el nombre real de la tabla
+    @Query(value = "SELECT " +
+            "UPPER(nivel) as nivel, " +
+            "COUNT(*) as cantidadClientes, " +
+            "COALESCE(SUM(puntos_acumulados), 0) as puntosTotales, " +
+            "CASE WHEN COUNT(*) > 0 THEN COALESCE(AVG(puntos_acumulados), 0.0) ELSE 0.0 END as promedioPuntos " +
+            "FROM fidelizacion_clientes " +
+            "GROUP BY nivel " +
+            "ORDER BY " +
+            "CASE UPPER(nivel) " +
+            "   WHEN 'PLATINUM' THEN 1 " +
+            "   WHEN 'GOLD' THEN 2 " +
+            "   WHEN 'SILVER' THEN 3 " +
+            "   WHEN 'BRONZE' THEN 4 " +
+            "   ELSE 5 END", nativeQuery = true)
     List<Object[]> obtenerEstadisticasPorNivel();
 
-    // === VERIFICACIÓN DE EXISTENCIA ===
+    // Consulta de prueba para verificar conexión con la tabla
+    @Query(value = "SELECT COUNT(*) FROM fidelizacion_clientes", nativeQuery = true)
+    Long contarTotalRegistros();
+
+    // Consulta para ver todos los registros (para debug)
+    @Query(value = "SELECT id_cliente, puntos_acumulados, nivel FROM fidelizacion_clientes", nativeQuery = true)
+    List<Object[]> obtenerTodosRegistros();
+
     boolean existsByClienteIdCliente(Long idCliente);
 
-    // === CLIENTES POR NIVEL ORDENADOS POR PUNTOS ===
-    List<Fidelizacion> findByNivelOrderByPuntosAcumuladosDesc(NivelFidelizacion nivel);
+    List<Fidelizacion> findByNivelOrderByPuntosAcumuladosDesc(Fidelizacion.NivelFidelizacion nivel);
 }
