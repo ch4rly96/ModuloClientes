@@ -19,14 +19,14 @@
 
         .card-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
         .card {
             border: none;
             border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
             width: 100%;
         }
 
@@ -46,40 +46,6 @@
 
         .card-body {
             padding: 3rem !important;
-        }
-
-        .client-info {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2.5rem;
-            border-left: 5px solid #1976d2;
-        }
-
-        .client-info i {
-            color: #1976d2;
-            font-size: 1.5rem;
-        }
-
-        .client-name {
-            font-weight: 600;
-            font-size: 1.2rem;
-            color: #1565c0;
-            margin-bottom: 0.5rem;
-        }
-
-        .client-points {
-            font-size: 1.1rem;
-            color: #424242;
-        }
-
-        .points-badge {
-            background: linear-gradient(135deg, #ffc107, #ff922b);
-            color: #212529;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 1.1rem;
         }
 
         .form-control, .form-select {
@@ -169,6 +135,32 @@
             margin-bottom: 2.5rem;
         }
 
+        /* Información del cliente sutil (opcional) */
+        .client-info-minimal {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 3px solid #ffc107;
+        }
+
+        .client-name {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1.1rem;
+        }
+
+        .client-points {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .points-value {
+            color: #212529;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             body {
@@ -185,10 +177,6 @@
 
             .card-header h4 {
                 font-size: 1.5rem;
-            }
-
-            .client-info {
-                padding: 1.25rem;
             }
 
             .form-control, .form-select {
@@ -230,10 +218,6 @@
                 font-size: 1.3rem;
             }
 
-            .client-info {
-                padding: 1rem;
-            }
-
             .form-label {
                 font-size: 1rem;
             }
@@ -245,7 +229,7 @@
 
         @media (min-width: 1200px) {
             .card-container {
-                max-width: 900px;
+                max-width: 700px;
             }
 
             .card-body {
@@ -277,24 +261,23 @@
         <div class="card-body">
             <form th:action="@{/fidelizacion/cliente/{idCliente}/canjear-puntos(idCliente=${idCliente})}" method="post">
 
-                <!-- Información del cliente -->
-                <div class="client-info">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-info-circle-fill me-3"></i>
+                <!-- Información del cliente mínima (OPCIONAL - puedes eliminarlo si no quieres mostrar info) -->
+                <div th:if="${clienteInfo}" class="client-info-minimal">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-fill text-dark me-3"></i>
                         <div>
-                            <div class="client-name" th:text="${clienteInfo?.nombre ?: 'Cliente'}">
+                            <div class="client-name" th:text="${clienteInfo.nombre}">
                                 Cliente
                             </div>
-                            <div class="client-points">
-                                Puntos actuales:
-                                <span class="points-badge ms-2" th:text="${clienteInfo?.puntosActuales ?: '0'}">
-                                    0
-                                </span>
+                            <div class="client-points mt-1">
+                                Puntos disponibles:
+                                <span class="points-value" th:text="${clienteInfo.puntosActuales}">0</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Puntos a canjear -->
                 <div class="form-section">
                     <label for="puntos" class="form-label">Puntos a Canjear</label>
                     <div class="input-group">
@@ -314,6 +297,7 @@
                     </div>
                 </div>
 
+                <!-- Concepto -->
                 <div class="form-section">
                     <label for="concepto" class="form-label">Concepto (opcional)</label>
                     <div class="input-group">
@@ -331,6 +315,7 @@
                     </div>
                 </div>
 
+                <!-- Botones -->
                 <div class="button-group">
                     <a th:href="@{/fidelizacion}" class="btn btn-secondary">
                         <i class="bi bi-x-circle me-2"></i>
