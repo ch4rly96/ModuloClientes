@@ -29,7 +29,7 @@ public interface FidelizacionRepository extends JpaRepository<Fidelizacion, Long
 
     List<Fidelizacion> findByOrderByPuntosAcumuladosDesc();
 
-    @Query("SELECT f FROM Fidelizacion f ORDER BY f.puntosAcumulados DESC")
+    @Query(value = "SELECT * FROM fidelizacion_clientes ORDER BY puntos_acumulados DESC LIMIT :limite", nativeQuery = true)
     List<Fidelizacion> findTopClientes(@Param("limite") Integer limite);
 
     List<Fidelizacion> findByUltimaActualizacionBetween(LocalDateTime fechaInicio, LocalDateTime fechaFin);

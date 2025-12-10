@@ -6,33 +6,33 @@
         <i class="bi bi-speedometer2"></i> Dashboard General
     </h2>
 
-        <!-- TARJETAS -->
+    <!-- TARJETAS -->
     <div class="row g-4 mb-5">
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-people text-primary"></i>
-                <h3 th:text="${totalClientes}"></h3>
+                <h3 th:text="${totalClientes}">0</h3>
                 <p class="text-muted">Total Clientes</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-check-circle text-success"></i>
-                <h3 th:text="${clientesActivos}"></h3>
+                <h3 th:text="${clientesActivos}">0</h3>
                 <p class="text-muted">Clientes Activos</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-star text-warning"></i>
-                <h3 th:text="${clientesEnFidelizacion}"></h3>
+                <h3 th:text="${clientesEnFidelizacion}">0</h3>
                 <p class="text-muted">En Fidelización</p>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card">
                 <i class="bi bi-exclamation-triangle text-danger"></i>
-                <h3 th:text="${clientesMorosos}"></h3>
+                <h3 th:text="${clientesMorosos}">0</h3>
                 <p class="text-muted">Morosos</p>
             </div>
         </div>
@@ -51,37 +51,109 @@
         </p>
     </div>
 
-    <!-- TABLA -->
+    <!-- TABLA TOP 3 CLIENTES FIDELIZADOS -->
     <div class="card shadow-sm p-3">
         <div class="d-flex justify-content-between">
-            <h5 class="fw-bold">Clientes Fidelizados</h5>
-            <a href="/fidelizacion" class="btn btn-primary btn-sm">Gestionar Fidelizacion</a>
+            <h5 class="fw-bold">Top 3 Clientes Fidelizados</h5>
+            <a href="/fidelizacion" class="btn btn-primary btn-sm">Gestionar Fidelización</a>
         </div>
 
         <table class="table table-striped mt-3">
             <thead>
             <tr>
-                <th>ID</th>
-                <th>Nombre</th>
+                <th>#</th>
+                <th>Cliente</th>
                 <th>Tipo</th>
-                <th>Nivel Fidelización</th>
+                <th>Nivel</th>
+                <th>Puntos</th>
+                <th>Estado</th>
             </tr>
             </thead>
             <tbody>
-            <!-- Mostrar los 5 primeros clientes fidelizados -->
-            <tr th:each="fidelizacion : ${topClientes}">
-                <td th:text="${fidelizacion.cliente.idCliente}"></td>
-                <td th:text="${fidelizacion.cliente.razonSocial}"></td>
-                <td th:text="${fidelizacion.cliente.tipoCliente}"></td>
+            <!-- Mostrar SOLO los top 3 clientes fidelizados -->
+            <tr th:each="fidelizacion, stat : ${topClientes}" th:if="${stat.index < 3}">
                 <td>
-                    <span th:classappend="${fidelizacion.cliente.estado ? 'badge bg-success' : 'badge bg-danger'}"
-                          th:text="${fidelizacion.cliente.estado ? 'Activo' : 'Inactivo'}"></span>
+                    <span th:switch="${stat.index}">
+                        <span th:case="0" class="badge bg-warning text-dark">1°</span>
+                        <span th:case="1" class="badge bg-secondary">2°</span>
+                        <span th:case="2" class="badge bg-danger">3°</span>
+                    </span>
                 </td>
-                <td th:text="${fidelizacion.nivel}"></td>
+                <td th:text="${fidelizacion.cliente.razonSocial != null} ?
+                              ${fidelizacion.cliente.razonSocial} :
+                              ${fidelizacion.cliente.nombreCompleto}">
+                    Nombre
+                </td>
+                <td>
+                    <!-- Modificado para usar las clases CSS personalizadas -->
+                    <span th:if="${fidelizacion.cliente.tipoCliente == 'Jurídico' or
+                                 fidelizacion.cliente.tipoCliente == 'Corporativo' or
+                                 fidelizacion.cliente.tipoCliente == 'Constructor' or
+                                 fidelizacion.cliente.tipoCliente == 'Empresa'}"
+                          class="badge-tipo-empresa">
+                        <span th:text="${fidelizacion.cliente.tipoCliente}"></span>
+                    </span>
+                    <span th:if="${fidelizacion.cliente.tipoCliente == 'Natural' or
+                                 fidelizacion.cliente.tipoCliente == 'Persona'}"
+                          class="badge-tipo-persona">
+                        <span th:text="${fidelizacion.cliente.tipoCliente}"></span>
+                    </span>
+                    <!-- Para cualquier otro tipo no especificado -->
+                    <span th:unless="${fidelizacion.cliente.tipoCliente == 'Jurídico' or
+                                     fidelizacion.cliente.tipoCliente == 'Corporativo' or
+                                     fidelizacion.cliente.tipoCliente == 'Constructor' or
+                                     fidelizacion.cliente.tipoCliente == 'Empresa' or
+                                     fidelizacion.cliente.tipoCliente == 'Natural' or
+                                     fidelizacion.cliente.tipoCliente == 'Persona'}"
+                          class="badge-tipo-empresa">
+                        <span th:text="${fidelizacion.cliente.tipoCliente}"></span>
+                    </span>
+                </td>
+                <td>
+                    <span th:switch="${fidelizacion.nivel?.toString()}">
+                        <!-- CAMBIADO: Nuevos colores para los niveles -->
+                        <span th:case="'PLATINUM'" class="badge nivel-platinum">Platinum</span>
+                        <span th:case="'GOLD'" class="badge nivel-gold">Gold</span>
+                        <span th:case="'SILVER'" class="badge nivel-silver">Silver</span>
+                        <span th:case="'BRONZE'" class="badge nivel-bronze">Bronze</span>
+                        <span th:case="*" class="badge nivel-default">
+                            <span th:text="${fidelizacion.nivel}">Nivel</span>
+                        </span>
+                    </span>
+                </td>
+                <td th:text="${fidelizacion.puntosAcumulados}">0</td>
+                <td>
+                    <span th:if="${fidelizacion.cliente.estado}"
+                          class="badge bg-success">Activo</span>
+                    <span th:unless="${fidelizacion.cliente.estado}"
+                          class="badge bg-danger">Inactivo</span>
+                </td>
+            </tr>
+
+            <!-- Si no hay clientes -->
+            <tr th:if="${#lists.isEmpty(topClientes)}">
+                <td colspan="6" class="text-center text-muted">
+                    No hay clientes fidelizados
+                </td>
+            </tr>
+
+            <!-- Si hay menos de 3 clientes -->
+            <tr th:if="${#lists.size(topClientes) < 3}">
+                <td colspan="6" class="text-center text-muted small">
+                    <i class="bi bi-info-circle"></i>
+                    Solo <span th:text="${#lists.size(topClientes)}">0</span> clientes fidelizados
+                </td>
             </tr>
             </tbody>
         </table>
 
+        <!-- Información adicional -->
+        <div class="mt-3 text-muted small">
+            <i class="bi bi-info-circle"></i>
+            Mostrando los <span th:text="${#lists.size(topClientes) > 3 ? 3 : #lists.size(topClientes)}">0</span>
+            clientes con más puntos de
+            <span th:text="${clientesEnFidelizacion}">0</span> en fidelización
+        </div>
     </div>
 
 </div>
@@ -150,4 +222,322 @@
         });
     });
 </script>
+
+<style>
+    /* ESTILOS ORIGINALES */
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-card i {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    .stat-card h3 {
+        font-size: 2rem;
+        margin: 10px 0;
+    }
+
+    /* ============================================
+       MODIFICACIONES CSS SOLICITADAS
+    ============================================= */
+
+    /* 1. ESTILOS PARA LOS NÚMEROS DEL TOP 3 - Solo el número 3 en color bronce */
+    .table-striped tbody tr td:first-child .badge {
+        min-width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 0;
+        margin: 0 auto;
+        width: 40px;
+        line-height: 40px;
+    }
+
+    .table-striped tbody tr:nth-child(1) td:first-child .badge {
+        background: linear-gradient(135deg, #FFD700, #FFC107) !important;
+        color: #8B4513 !important;
+        border: 2px solid #FFC107 !important;
+        box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+    }
+
+    .table-striped tbody tr:nth-child(2) td:first-child .badge {
+        background: linear-gradient(135deg, #C0C0C0, #A0A0A0) !important;
+        color: #333 !important;
+        border: 2px solid #C0C0C0 !important;
+        box-shadow: 0 2px 4px rgba(192, 192, 192, 0.3);
+    }
+
+    .table-striped tbody tr:nth-child(3) td:first-child .badge {
+        background: linear-gradient(135deg, #CD7F32, #B87333) !important;
+        color: white !important;
+        border: 2px solid #CD7F32 !important;
+        box-shadow: 0 2px 4px rgba(205, 127, 50, 0.3);
+    }
+
+    /* 2. TROFEOS PARA LA COLUMNA CLIENTE */
+    .table-striped tbody tr td:nth-child(2) {
+        position: relative;
+        padding-left: 40px !important;
+    }
+
+    .table-striped tbody tr:nth-child(1) td:nth-child(2)::before {
+        content: "🏆";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.3em;
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .table-striped tbody tr:nth-child(2) td:nth-child(2)::before {
+        content: "🏆";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.3em;
+        background: linear-gradient(135deg, #C0C0C0, #808080);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .table-striped tbody tr:nth-child(3) td:nth-child(2)::before {
+        content: "🏆";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.3em;
+        background: linear-gradient(135deg, #CD7F32, #8B4513);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* 3. TARJETITAS PARA LA COLUMNA TIPO */
+    .badge-tipo-empresa {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca) !important;
+        color: white !important;
+        border-color: #0a58ca !important;
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        min-width: 100px;
+        text-align: center;
+        border: 1px solid transparent;
+    }
+
+    .badge-tipo-persona {
+        background: linear-gradient(135deg, #6ea8fe, #0d6efd) !important;
+        color: white !important;
+        border-color: #6ea8fe !important;
+        box-shadow: 0 2px 4px rgba(110, 168, 254, 0.2);
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        min-width: 100px;
+        text-align: center;
+        border: 1px solid transparent;
+    }
+
+    /* 4. ICONO DE FUEGO PARA LA COLUMNA PUNTOS */
+    .table-striped tbody tr td:nth-child(5) {
+        position: relative;
+        padding-left: 40px !important;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .table-striped tbody tr:nth-child(1) td:nth-child(5)::before {
+        content: "🔥";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.4em;
+        background: linear-gradient(135deg, #FF4500, #FF8C00, #FFD700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fire-animation 1.5s infinite alternate;
+    }
+
+    .table-striped tbody tr:nth-child(2) td:nth-child(5)::before {
+        content: "🔥";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.3em;
+        background: linear-gradient(135deg, #A9A9A9, #C0C0C0, #D3D3D3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fire-animation 2s infinite alternate;
+    }
+
+    .table-striped tbody tr:nth-child(3) td:nth-child(5)::before {
+        content: "🔥";
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2em;
+        background: linear-gradient(135deg, #8B4513, #CD7F32, #D2691E);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fire-animation 2.5s infinite alternate;
+    }
+
+    @keyframes fire-animation {
+        0% {
+            transform: translateY(-50%) scale(1);
+        }
+        100% {
+            transform: translateY(-50%) scale(1.1);
+        }
+    }
+
+    /* 5. TARJETITAS DE COLORES PARA LA COLUMNA NIVEL - MODIFICADO */
+    .badge.nivel-platinum,
+    .badge.nivel-gold,
+    .badge.nivel-silver,
+    .badge.nivel-bronze,
+    .badge.nivel-default {
+        padding: 8px 16px !important;
+        border-radius: 20px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        min-width: 100px !important;
+        text-align: center !important;
+        border: 2px solid transparent !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    /* Platinum - Color gris plateado claro como en la imagen */
+    .badge.nivel-platinum {
+        background: linear-gradient(135deg, #e5e7eb, #d1d5db, #9ca3af) !important;
+        color: #374151 !important;
+        border-color: #d1d5db !important;
+        text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+    }
+
+    /* Gold - Color dorado vibrante */
+    .badge.nivel-gold {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706) !important;
+        color: #78350f !important;
+        border-color: #f59e0b !important;
+        text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+    }
+
+    /* Silver - Color gris plateado más oscuro */
+    .badge.nivel-silver {
+        background: linear-gradient(135deg, #9ca3af, #6b7280, #4b5563) !important;
+        color: white !important;
+        border-color: #6b7280 !important;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+    }
+
+    /* Bronze - Color bronce/marrón */
+    .badge.nivel-bronze {
+        background: linear-gradient(135deg, #b45309, #92400e, #78350f) !important;
+        color: white !important;
+        border-color: #92400e !important;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+    }
+
+    /* Default - Para cualquier otro nivel */
+    .badge.nivel-default {
+        background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+        color: white !important;
+        border-color: #4b5563 !important;
+    }
+
+    .badge.nivel-platinum:hover,
+    .badge.nivel-gold:hover,
+    .badge.nivel-silver:hover,
+    .badge.nivel-bronze:hover,
+    .badge.nivel-default:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+
+    /* ESTILOS ADICIONALES PARA MEJOR VISUALIZACIÓN */
+    .table-striped tbody tr td {
+        vertical-align: middle;
+        padding: 16px 8px !important;
+    }
+
+    .table-striped {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .table-striped tbody tr {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+
+    .table-striped tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .card.shadow-sm.p-3 {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+        .table-striped tbody tr td:nth-child(2),
+        .table-striped tbody tr td:nth-child(5) {
+            padding-left: 35px !important;
+        }
+
+        .table-striped tbody tr td:nth-child(2)::before,
+        .table-striped tbody tr td:nth-child(5)::before {
+            left: 8px;
+            font-size: 1.1em;
+        }
+
+        .badge-tipo-empresa,
+        .badge-tipo-persona,
+        .badge.nivel-platinum,
+        .badge.nivel-gold,
+        .badge.nivel-silver,
+        .badge.nivel-bronze,
+        .badge.nivel-default {
+            min-width: 80px !important;
+            padding: 6px 12px !important;
+            font-size: 0.8rem !important;
+        }
+    }
+</style>
 </html>

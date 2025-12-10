@@ -15,6 +15,7 @@ public interface FidelizacionService {
     void eliminarFidelizacion(Long idFidelizacion);
     void eliminarPorCliente(Long idCliente);
 
+
     // === GESTIÓN DE PUNTOS ===
     Fidelizacion agregarPuntos(Long idCliente, Integer puntos);
     Fidelizacion agregarPuntos(Long idCliente, Integer puntos, String concepto);

@@ -351,4 +351,5 @@ public class FidelizacionServicelmpl implements FidelizacionService {
             agregarPuntos(idCliente, puntos, "Puntos por compra de S/ " + montoCompra);
         }
     }
+
 }
