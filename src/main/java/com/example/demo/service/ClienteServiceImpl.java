@@ -90,6 +90,16 @@ public class ClienteServiceImpl implements ClienteService {
         return clienteRepository.findByTipoClienteAndSubtipoCliente(tipoCliente, subtipoCliente);
     }
 
+    // Método para contar clientes por tipo
+    public long contarClientesPorTipo(String tipoCliente) {
+        return clienteRepository.findByTipoCliente(tipoCliente).size();
+    }
+
+    // Método para contar clientes por subtipo
+    public long contarClientesPorSubtipo(String tipoCliente, String subtipoCliente) {
+        return clienteRepository.findByTipoClienteAndSubtipoCliente(tipoCliente, subtipoCliente).size();
+    }
+
     // === BÚSQUEDA ===
     @Override
     public Optional<Cliente> obtenerPorId(Long id) {

@@ -19,6 +19,9 @@ public interface ClienteService {
     List<Cliente> listarMorosos();
     List<Cliente> listarPorTipo(String tipoCliente, String subtipoCliente);
 
+    long contarClientesPorTipo(String tipoCliente);
+    long contarClientesPorSubtipo(String tipoCliente, String subtipoCliente);
+
     // === BÚSQUEDA AVANZADA ===
     List<Cliente> buscarPorNombre(String texto);
     List<Cliente> buscarPorRazonSocial(String texto);
