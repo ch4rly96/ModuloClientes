@@ -64,27 +64,20 @@
                 <th>ID</th>
                 <th>Nombre</th>
                 <th>Tipo</th>
-                <th>Fecha Registro</th>
-                <th>Estado</th>
                 <th>Nivel Fidelización</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>100259</td>
-                <td>Juan Pérez Rodríguez</td>
-                <td>Natural</td>
-                <td>15/08/2025</td>
-                <td><span class="badge bg-success">Activo</span></td>
-                <td><span class="badge bg-warning text-dark">Oro</span></td>
-            </tr>
-            <tr>
-                <td>100258</td>
-                <td>Constructora Andina S.A.C.</td>
-                <td>Jurídico</td>
-                <td>14/08/2025</td>
-                <td><span class="badge bg-success">Activo</span></td>
-                <td><span class="badge bg-secondary">Plata</span></td>
+            <!-- Mostrar los 5 primeros clientes fidelizados -->
+            <tr th:each="fidelizacion : ${topClientes}">
+                <td th:text="${fidelizacion.cliente.idCliente}"></td>
+                <td th:text="${fidelizacion.cliente.razonSocial}"></td>
+                <td th:text="${fidelizacion.cliente.tipoCliente}"></td>
+                <td>
+                    <span th:classappend="${fidelizacion.cliente.estado ? 'badge bg-success' : 'badge bg-danger'}"
+                          th:text="${fidelizacion.cliente.estado ? 'Activo' : 'Inactivo'}"></span>
+                </td>
+                <td th:text="${fidelizacion.nivel}"></td>
             </tr>
             </tbody>
         </table>
