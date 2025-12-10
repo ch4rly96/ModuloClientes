@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Fidelizacion;
+import com.example.demo.repository.FidelizacionRepository;
 import com.example.demo.service.ClienteService;
 import com.example.demo.service.FidelizacionService;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ public class FidelizacionController {
 
     private final FidelizacionService fidelizacionService;
     private final ClienteService clienteService;
+    private FidelizacionRepository fidelizacionRepository;
 
     public FidelizacionController(FidelizacionService fidelizacionService, ClienteService clienteService) {
         this.fidelizacionService = fidelizacionService;
@@ -177,60 +179,120 @@ public class FidelizacionController {
     @GetMapping("/estadisticas")
     public String obtenerEstadisticas(Model model) {
         try {
-            // Obtener estadísticas reales de la base de datos
-            Object[] estadisticasGenerales = fidelizacionService.obtenerEstadisticasGenerales();
-            List<Object[]> estadisticasPorNivel = fidelizacionService.obtenerEstadisticasPorNivel();
+            System.out.println("=== INICIANDO OBTENCIÓN DE ESTADÍSTICAS ===");
 
-            // Procesar estadísticas generales
-            if (estadisticasGenerales != null && estadisticasGenerales.length >= 3) {
-                Long totalClientes = (Long) estadisticasGenerales[0];
-                Long totalPuntos = (Long) estadisticasGenerales[1];
-                Double promedioPuntos = (Double) estadisticasGenerales[2];
+            // 1. Obtener estadísticas generales
+            Object[] statsGenerales = fidelizacionService.obtenerEstadisticasGenerales();
 
-                // Si no hay clientes, establecer valores por defecto
-                if (totalClientes == 0) {
-                    model.addAttribute("totalClientes", 0);
-                    model.addAttribute("totalPuntos", 0);
-                    model.addAttribute("promedioPuntos", 0.0);
-                } else {
-                    model.addAttribute("totalClientes", totalClientes);
-                    model.addAttribute("totalPuntos", totalPuntos);
-                    model.addAttribute("promedioPuntos", String.format("%.2f", promedioPuntos));
+            // 2. Obtener estadísticas por nivel
+            List<Object[]> statsPorNivel = fidelizacionService.obtenerEstadisticasPorNivel();
+
+            // 3. Procesar estadísticas generales
+            long totalClientes = 0;
+            long totalPuntos = 0;
+            double promedioPuntos = 0.0;
+
+            if (statsGenerales != null && statsGenerales.length >= 3) {
+                try {
+                    // Los valores vienen como Object, necesitamos convertirlos
+                    totalClientes = ((Number) statsGenerales[0]).longValue();
+                    totalPuntos = ((Number) statsGenerales[1]).longValue();
+                    promedioPuntos = ((Number) statsGenerales[2]).doubleValue();
+
+                    System.out.println("Estadísticas procesadas -> Clientes: " + totalClientes +
+                            ", Puntos: " + totalPuntos +
+                            ", Promedio: " + promedioPuntos);
+                } catch (Exception e) {
+                    System.out.println("Error al convertir estadísticas generales: " + e.getMessage());
                 }
             } else {
-
-                model.addAttribute("totalClientes", 8);
-                model.addAttribute("totalPuntos", 5708);
-                model.addAttribute("promedioPuntos", 713.5);
+                System.out.println("Estadísticas generales nulas o incompletas");
             }
 
-            // Procesar estadísticas por nivel
-            if (estadisticasPorNivel != null && !estadisticasPorNivel.isEmpty()) {
-                // Convertir a una lista más manejable
+            model.addAttribute("totalClientes", totalClientes);
+            model.addAttribute("totalPuntos", totalPuntos);
+            model.addAttribute("promedioPuntos", String.format("%.2f", promedioPuntos));
+
+            // 4. Procesar estadísticas por nivel
+            if (statsPorNivel != null && !statsPorNivel.isEmpty()) {
                 List<Map<String, Object>> nivelesProcesados = new ArrayList<>();
-                for (Object[] nivelData : estadisticasPorNivel) {
-                    if (nivelData.length >= 3) {
-                        Map<String, Object> nivelMap = new HashMap<>();
-                        nivelMap.put("nivel", nivelData[0]); // NivelFidelizacion enum
-                        nivelMap.put("cantidadClientes", nivelData[1]); // Long count
-                        nivelMap.put("promedioPuntos", String.format("%.2f", nivelData[2])); // Double avg
-                        nivelesProcesados.add(nivelMap);
+
+                System.out.println("Procesando " + statsPorNivel.size() + " niveles...");
+
+                for (Object[] nivelData : statsPorNivel) {
+                    try {
+                        if (nivelData.length >= 3) {
+                            Map<String, Object> nivelMap = new HashMap<>();
+
+                            // Nivel
+                            Object nivelObj = nivelData[0];
+                            String nivelStr;
+                            if (nivelObj instanceof Fidelizacion.NivelFidelizacion) {
+                                nivelStr = ((Fidelizacion.NivelFidelizacion) nivelObj).toString();
+                            } else {
+                                nivelStr = nivelObj != null ? nivelObj.toString() : "DESCONOCIDO";
+                            }
+                            nivelMap.put("nivel", nivelStr);
+
+                            // Cantidad de clientes
+                            Long cantidad = 0L;
+                            if (nivelData[1] != null) {
+                                cantidad = ((Number) nivelData[1]).longValue();
+                            }
+                            nivelMap.put("cantidadClientes", cantidad);
+
+                            // Promedio de puntos
+                            Double promedio = 0.0;
+                            if (nivelData[2] != null) {
+                                promedio = ((Number) nivelData[2]).doubleValue();
+                            }
+                            nivelMap.put("promedioPuntos", String.format("%.2f", promedio));
+                            nivelMap.put("promedioPuntosNum", promedio);
+
+                            // Calcular porcentaje
+                            double porcentaje = 0.0;
+                            if (totalClientes > 0 && cantidad > 0) {
+                                porcentaje = (cantidad.doubleValue() / totalClientes) * 100;
+                            }
+                            nivelMap.put("porcentaje", String.format("%.1f", porcentaje));
+                            nivelMap.put("porcentajeNumero", porcentaje);
+
+                            nivelesProcesados.add(nivelMap);
+
+                            System.out.println("Nivel " + nivelStr + ": " + cantidad +
+                                    " clientes, " + promedio + " promedio, " +
+                                    porcentaje + "%");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error procesando nivel: " + Arrays.toString(nivelData));
+                        e.printStackTrace();
                     }
                 }
+
                 model.addAttribute("estadisticasPorNivel", nivelesProcesados);
             } else {
-                // Si no hay datos por nivel, lista vacía
+                System.out.println("No hay estadísticas por nivel");
                 model.addAttribute("estadisticasPorNivel", new ArrayList<>());
             }
+
+            // 5. Contar registros para debug
+            Long totalRegistros = fidelizacionService.contarTotalRegistros();
+            model.addAttribute("debugTotalRegistros", totalRegistros);
+
+            System.out.println("=== FINALIZADO: Total clientes = " + totalClientes + " ===");
 
             return "fidelizacion/estadisticas";
 
         } catch (Exception e) {
-            // En caso de error, mostrar valores por defecto
+            System.out.println("ERROR CRÍTICO en estadísticas: " + e.getMessage());
+            e.printStackTrace();
+
             model.addAttribute("totalClientes", 0);
             model.addAttribute("totalPuntos", 0);
-            model.addAttribute("promedioPuntos", 0.0);
+            model.addAttribute("promedioPuntos", "0.00");
             model.addAttribute("estadisticasPorNivel", new ArrayList<>());
+            model.addAttribute("error", "Error: " + e.getMessage());
+
             return "fidelizacion/estadisticas";
         }
 

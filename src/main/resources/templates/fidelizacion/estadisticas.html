@@ -5,70 +5,50 @@
     <title>Estadísticas de Fidelización</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .stats-card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            transition: transform 0.3s;
-        }
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .badge-bronze { background-color: #cd7f32; color: white; }
-        .badge-silver { background-color: #c0c0c0; color: black; }
-        .badge-gold { background-color: #ffd700; color: black; }
-        .badge-platinum { background-color: #e5e4e2; color: black; }
-    </style>
 </head>
-<body class="bg-light">
+<body>
 <div class="container mt-5">
-    <!-- Encabezado -->
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="text-primary">
             <i class="bi bi-bar-chart-fill"></i> Estadísticas de Fidelización
         </h1>
-        <a th:href="@{/fidelizacion}" class="btn btn-outline-secondary">
+        <a th:href="@{/fidelizacion}" class="btn btn-outline-primary">
             <i class="bi bi-arrow-left"></i> Volver a la Lista
         </a>
     </div>
 
-    <!-- Tarjetas de Estadísticas Generales -->
+    <!-- Error message -->
+    <div th:if="${error}" class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- Estadísticas Generales -->
     <div class="row mb-4">
         <div class="col-md-4">
-            <div class="card stats-card bg-primary text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-people-fill display-4 mb-3"></i>
-                    <h5 class="card-title">Total de Clientes</h5>
-                    <p class="stat-number" th:text="${totalClientes}">0</p>
-                    <small class="text-light">Clientes registrados</small>
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Clientes</h5>
+                    <h2 class="text-primary" th:text="${totalClientes}">0</h2>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card stats-card bg-success text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-star-fill display-4 mb-3"></i>
-                    <h5 class="card-title">Total de Puntos</h5>
-                    <p class="stat-number" th:text="${totalPuntos}">0</p>
-                    <small class="text-light">Puntos acumulados</small>
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Puntos</h5>
+                    <h2 class="text-success" th:text="${totalPuntos}">0</h2>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card stats-card bg-info text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-graph-up display-4 mb-3"></i>
-                    <h5 class="card-title">Promedio de Puntos</h5>
-                    <p class="stat-number" th:text="${promedioPuntos}">0</p>
-                    <small class="text-light">Por cliente</small>
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Promedio</h5>
+                    <h2 class="text-info" th:text="${promedioPuntos}">0.00</h2>
                 </div>
             </div>
         </div>
@@ -77,116 +57,40 @@
     <!-- Estadísticas por Nivel -->
     <div class="card">
         <div class="card-header bg-dark text-white">
-            <h4 class="mb-0">
-                <i class="bi bi-pie-chart-fill"></i> Estadísticas por Nivel de Fidelización
-            </h4>
+            <h5 class="mb-0">Estadísticas por Nivel</h5>
         </div>
         <div class="card-body">
-            <!-- Tabla Responsive -->
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead class="table-dark">
-                    <tr>
-                        <th width="25%">Nivel</th>
-                        <th width="25%">Cantidad de Clientes</th>
-                        <th width="25%">Promedio de Puntos</th>
-                        <th width="25%">Porcentaje</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <!-- Si no hay datos -->
-                    <tr th:if="${estadisticasPorNivel == null or estadisticasPorNivel.isEmpty()}">
-                        <td colspan="4" class="text-center text-muted py-4">
-                            <i class="bi bi-database-slash display-6"></i><br>
-                            No hay datos de fidelización disponibles
-                        </td>
-                    </tr>
-
-                    <!-- Iterar sobre los niveles -->
-                    <tr th:each="nivel : ${estadisticasPorNivel}">
-                        <!-- Columna del Nivel -->
-                        <td>
-                                <span th:switch="${nivel.nivel?.toString()}">
-                                    <span th:case="'BRONZE'" class="badge badge-bronze px-3 py-2 fs-6">
-                                        Bronze
-                                    </span>
-                                    <span th:case="'SILVER'" class="badge badge-silver px-3 py-2 fs-6">
-                                        Silver
-                                    </span>
-                                    <span th:case="'GOLD'" class="badge badge-gold px-3 py-2 fs-6">
-                                        Gold
-                                    </span>
-                                    <span th:case="'PLATINUM'" class="badge badge-platinum px-3 py-2 fs-6">
-                                        Platinum
-                                    </span>
-                                    <span th:case="*" class="badge bg-secondary px-3 py-2 fs-6">
-                                        <span th:text="${nivel.nivel}">Nivel</span>
-                                    </span>
-                                </span>
-                        </td>
-
-                        <!-- Columna Cantidad de Clientes -->
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-person-fill me-2 text-primary"></i>
-                                <span class="fw-bold fs-5" th:text="${nivel.cantidadClientes}">0</span>
-                                <span class="text-muted ms-2">clientes</span>
-                            </div>
-                        </td>
-
-                        <!-- Columna Promedio de Puntos -->
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-star-fill me-2 text-warning"></i>
-                                <span class="fw-bold fs-5" th:text="${nivel.promedioPuntos}">0</span>
-                                <span class="text-muted ms-2">puntos</span>
-                            </div>
-                        </td>
-
-                        <!-- Columna Porcentaje -->
-                        <td>
-                            <div class="progress" style="height: 25px;">
-                                <div class="progress-bar"
-                                     role="progressbar"
-                                     th:style="'width: ' + ${totalClientes > 0 ? (nivel.cantidadClientes * 100 / totalClientes) : 0} + '%;'"
-                                     th:attr="aria-valuenow=${totalClientes > 0 ? (nivel.cantidadClientes * 100 / totalClientes) : 0}"
-                                     aria-valuemin="0"
-                                     aria-valuemax="100">
-                                        <span class="fw-bold">
-                                            <span th:text="${totalClientes > 0 ? #numbers.formatDecimal(nivel.cantidadClientes * 100 / totalClientes, 1, 1) : 0}">0</span>%
-                                        </span>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                    <tfoot th:if="${not (estadisticasPorNivel == null or estadisticasPorNivel.isEmpty())}">
-                    <tr class="table-info">
-                        <td class="fw-bold">TOTAL</td>
-                        <td class="fw-bold" th:text="${totalClientes}">0</td>
-                        <td class="fw-bold" th:text="${promedioPuntos}">0</td>
-                        <td class="fw-bold">100%</td>
-                    </tr>
-                    </tfoot>
-                </table>
+            <div th:if="${#lists.isEmpty(estadisticasPorNivel)}" class="alert alert-warning">
+                No se encontraron datos por nivel
             </div>
 
-            <!-- Información adicional -->
-            <div class="mt-4 p-3 bg-light rounded">
-                <h6><i class="bi bi-info-circle-fill text-primary"></i> Información:</h6>
-                <ul class="mb-0">
-                    <li>Los datos se actualizan en tiempo real según la información en la base de datos.</li>
-                    <li>El promedio de puntos se calcula dividiendo el total de puntos entre el número de clientes.</li>
-                    <li>El porcentaje representa la distribución de clientes por nivel.</li>
-                </ul>
-            </div>
+            <table th:unless="${#lists.isEmpty(estadisticasPorNivel)}" class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Nivel</th>
+                    <th>Clientes</th>
+                    <th>Promedio Puntos</th>
+                    <th>%</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="nivel : ${estadisticasPorNivel}">
+                    <td>
+                        <span th:text="${nivel.nivel}">Nivel</span>
+                    </td>
+                    <td th:text="${nivel.cantidadClientes}">0</td>
+                    <td th:text="${nivel.promedioPuntos}">0.00</td>
+                    <td th:text="${nivel.porcentaje}">0</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Fecha de actualización -->
-    <div class="mt-3 text-end text-muted small">
-        <i class="bi bi-clock"></i>
-        Última actualización: <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+    <!-- Info debug -->
+    <div class="mt-3 text-muted small">
+        <i class="bi bi-info-circle"></i>
+        <span th:text="${debugTotalRegistros}">0</span> registros en la base de datos
     </div>
 </div>
 

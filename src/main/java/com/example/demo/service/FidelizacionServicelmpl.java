@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
 public class FidelizacionServicelmpl implements FidelizacionService {
+
+    @Override
+    public Long contarTotalRegistros() {
+        return fidelizacionRepository.count();
+    }
 
     @Autowired
     private FidelizacionRepository fidelizacionRepository;
@@ -198,12 +202,113 @@ public class FidelizacionServicelmpl implements FidelizacionService {
     // === ESTADÍSTICAS ===
     @Override
     public Object[] obtenerEstadisticasGenerales() {
-        return fidelizacionRepository.obtenerEstadisticasGenerales();
+        try {
+            System.out.println("=== CALCULANDO ESTADÍSTICAS GENERALES ===");
+
+            // Usar findAll() y calcular manualmente
+            List<Fidelizacion> todas = fidelizacionRepository.findAll();
+            System.out.println("Total registros encontrados: " + todas.size());
+
+            if (todas.isEmpty()) {
+                System.out.println("No hay registros, devolviendo ceros");
+                return new Object[]{0L, 0L, 0.0};
+            }
+
+            // Calcular totales
+            long totalClientes = todas.size();
+            long totalPuntos = 0;
+
+            for (Fidelizacion f : todas) {
+                totalPuntos += f.getPuntosAcumulados();
+                System.out.println("Cliente ID: " + f.getCliente().getIdCliente() +
+                        ", Puntos: " + f.getPuntosAcumulados() +
+                        ", Nivel: " + f.getNivel());
+            }
+
+            double promedio = totalClientes > 0 ? (double) totalPuntos / totalClientes : 0.0;
+
+            System.out.println("Resultados -> Clientes: " + totalClientes +
+                    ", Puntos: " + totalPuntos +
+                    ", Promedio: " + promedio);
+
+            return new Object[]{totalClientes, totalPuntos, promedio};
+
+        } catch (Exception e) {
+            System.out.println("ERROR en obtenerEstadisticasGenerales: " + e.getMessage());
+            e.printStackTrace();
+            return new Object[]{0L, 0L, 0.0};
+        }
     }
 
     @Override
     public List<Object[]> obtenerEstadisticasPorNivel() {
-        return fidelizacionRepository.obtenerEstadisticasPorNivel();
+        try {
+            System.out.println("=== CALCULANDO ESTADÍSTICAS POR NIVEL ===");
+
+            List<Fidelizacion> todas = fidelizacionRepository.findAll();
+            System.out.println("Total registros para agrupar: " + todas.size());
+
+            if (todas.isEmpty()) {
+                System.out.println("No hay registros para agrupar");
+                return new ArrayList<>();
+            }
+
+            // Agrupar por nivel usando Map
+            Map<Fidelizacion.NivelFidelizacion, List<Fidelizacion>> porNivel = new HashMap<>();
+
+            for (Fidelizacion f : todas) {
+                Fidelizacion.NivelFidelizacion nivel = f.getNivel();
+                if (!porNivel.containsKey(nivel)) {
+                    porNivel.put(nivel, new ArrayList<>());
+                }
+                porNivel.get(nivel).add(f);
+            }
+
+            System.out.println("Niveles encontrados: " + porNivel.size());
+
+            List<Object[]> resultados = new ArrayList<>();
+
+            // Calcular para cada nivel
+            for (Map.Entry<Fidelizacion.NivelFidelizacion, List<Fidelizacion>> entry : porNivel.entrySet()) {
+                Fidelizacion.NivelFidelizacion nivel = entry.getKey();
+                List<Fidelizacion> clientesNivel = entry.getValue();
+
+                long cantidad = clientesNivel.size();
+                long totalPuntosNivel = 0;
+
+                for (Fidelizacion f : clientesNivel) {
+                    totalPuntosNivel += f.getPuntosAcumulados();
+                }
+
+                double promedioNivel = cantidad > 0 ? (double) totalPuntosNivel / cantidad : 0.0;
+
+                System.out.println("Nivel " + nivel + ": " + cantidad + " clientes, " +
+                        totalPuntosNivel + " puntos, promedio " + promedioNivel);
+
+                resultados.add(new Object[]{nivel, cantidad, promedioNivel});
+            }
+
+            // Ordenar resultados: Platinum, Gold, Silver, Bronze
+            resultados.sort((a, b) -> {
+                String nivelA = ((Fidelizacion.NivelFidelizacion) a[0]).toString();
+                String nivelB = ((Fidelizacion.NivelFidelizacion) b[0]).toString();
+
+                Map<String, Integer> orden = new HashMap<>();
+                orden.put("PLATINUM", 1);
+                orden.put("GOLD", 2);
+                orden.put("SILVER", 3);
+                orden.put("BRONZE", 4);
+
+                return orden.getOrDefault(nivelA, 5) - orden.getOrDefault(nivelB, 5);
+            });
+
+            return resultados;
+
+        } catch (Exception e) {
+            System.out.println("ERROR en obtenerEstadisticasPorNivel: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // === OBTENER INFORMACIÓN ESPECÍFICA ===

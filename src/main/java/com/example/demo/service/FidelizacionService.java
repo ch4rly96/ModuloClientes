@@ -39,6 +39,9 @@ public interface FidelizacionService {
     Object[] obtenerEstadisticasGenerales();
     List<Object[]> obtenerEstadisticasPorNivel();
 
+    // === NUEVO MÉTODO PARA CONTAR ===
+    Long contarTotalRegistros();
+
     // === OBTENER INFORMACIÓN ESPECÍFICA ===
     Integer obtenerPuntosCliente(Long idCliente);
     Fidelizacion.NivelFidelizacion obtenerNivelCliente(Long idCliente);
